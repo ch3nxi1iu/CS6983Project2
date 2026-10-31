@@ -315,9 +315,34 @@ Move the issue's card as work progresses:
   connected, no assignments, sync failed, nothing left today).
 - **Do** recalculate the plan and forecast on the server after anything they
   depend on changes (sync, availability, estimates, session done or missed).
-- **Do** use Tailwind utility classes. Define colors once as theme tokens in
-  `globals.css` (`@theme`), with dark-mode values, and use those tokens instead
-  of raw hex values, so light and dark mode stay consistent.
+- **Do** use Tailwind utility classes with the mockup's design tokens below.
+  Define them once in `globals.css` as `@theme` colors (`--color-paper: #EBEFEE;`
+  gives `bg-paper`), put the dark values in a `prefers-color-scheme: dark`
+  block, and use them through utilities (`bg-paper`, `text-ink-2`,
+  `border-rule`). If they aren't in `globals.css` yet, add them in the same PR.
+- **Don't** use Tailwind's default palette (`blue-600`, `gray-200`) or raw hex
+  values in components.
+- **Font:** Schibsted Grotesk (weights 400–800), loaded with `next/font/google`
+  in `src/app/layout.tsx` (built into Next.js, no new dependency). Numbers use
+  `tabular-nums`.
+
+<!-- v3: in the HW3 test the agent skipped "define colors as tokens" and used
+     Tailwind blue/gray, because the rule named no values. -->
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `paper` | `#EBEFEE` | `#0E1822` | Page background |
+| `surface` | `#FFFFFF` | `#15222E` | Cards and panels |
+| `surface-2` | `#F4F7F6` | `#1B2A37` | Sidebar, table headers, subtle fills |
+| `ink` | `#17283A` | `#E5ECEF` | Main text, primary buttons |
+| `ink-2` | `#506070` | `#A2B2BE` | Secondary text |
+| `ink-3` | `#7D8A96` | `#7A8B98` | Hints and small labels |
+| `rule` | `#D3DCDB` | `#2A3B49` | Borders and dividers |
+| `line` | `#C2362E` | `#F06A5F` | Study-hours line, crunch weeks, errors |
+| `line-soft` | `#F7E3E1` | `#3A2224` | Crunch and warning backgrounds |
+| `ok` | `#3F7A3A` | `#8BC47F` | Done, saved, connected |
+| `edit` | `#5458A8` | `#9AA0F0` | Links, focus rings, edit states |
+| `c1`–`c4` | `#2C7A80` `#B4861A` `#5458A8` `#62813C` | `#5FB4B9` `#E2B84F` `#9196E8` `#9CC06E` | One color per course |
 
 ### Patterns to avoid
 - **Don't** put business logic in React components or route handlers.
@@ -387,4 +412,4 @@ Move the issue's card as work progresses:
 |---|---|---|---|
 | v1 (part A) | 2026-10-29 | Project context, architecture, naming, testing strategy, Scrum workflow | Initial rules for Sprint 1 |
 | v2 (part B) | 2026-10-31 | PRD and design references, mockup rules, screens and flows, do's and don'ts, security, accessibility | Give the AI the product spec and the rules for using the mockup |
-| v3 (part A) | 2026-10-30 | Acceptance-criterion tests must run the real user path; no test-only props; done check adds `npm run build`, trying each criterion in the browser with a reload, and reporting how each was checked | HW3 with-rules run: all 36 tests passed, but marked dates were never saved because the component test mocked our own `onSave` |
+| v3 | 2026-10-30 | Part A: acceptance-criterion tests must run the real user path; no test-only props; done check adds `npm run build`, trying each criterion in the browser with a reload, and reporting how each was checked. Part B: the mockup's color tokens (light and dark) and font, with exact values, and a ban on Tailwind's default palette | HW3 with-rules run: all 36 tests passed, but marked dates were never saved because the component test mocked our own `onSave`; and the agent skipped "define colors as tokens" and used Tailwind blue/gray |
