@@ -27,3 +27,8 @@ URL it prints into `.env`.
 | `npm run lint` | Lint with ESLint |
 | `npm run typecheck` | Generate Next.js route types and type-check |
 | `npm run build` | Production build |
+
+## Mockup
+
+An interactive desktop and mobile mockup of Loadline is in
+[`docs/mockup/index.html`](docs/mockup/index.html). Open it in a browser.

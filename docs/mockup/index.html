@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loadline mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EBEFEE; --surface:#FFFFFF; --surface-2:#F4F7F6; --ink:#17283A; --ink-2:#506070; --ink-3:#7D8A96;
+  --rule:#D3DCDB; --line:#C2362E; --line-soft:#F7E3E1; --ok:#3F7A3A; --edit:#5458A8; --bezel:#1B2633;
+  --c1:#2C7A80; --c2:#B4861A; --c3:#5458A8; --c4:#62813C;
+  --font:"Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1822; --surface:#15222E; --surface-2:#1B2A37; --ink:#E5ECEF; --ink-2:#A2B2BE; --ink-3:#7A8B98;
+    --rule:#2A3B49; --line:#F06A5F; --line-soft:#3A2224; --ok:#8BC47F; --edit:#9AA0F0; --bezel:#050A0F;
+    --c1:#5FB4B9; --c2:#E2B84F; --c3:#9196E8; --c4:#9CC06E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1822; --surface:#15222E; --surface-2:#1B2A37; --ink:#E5ECEF; --ink-2:#A2B2BE; --ink-3:#7A8B98;
+  --rule:#2A3B49; --line:#F06A5F; --line-soft:#3A2224; --ok:#8BC47F; --edit:#9AA0F0; --bezel:#050A0F;
+  --c1:#5FB4B9; --c2:#E2B84F; --c3:#9196E8; --c4:#9CC06E; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--edit);outline-offset:2px}
+
+/* ---------- Mockup toolbar ---------- */
+.toolbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;padding:12px clamp(16px,3vw,32px);background:var(--paper);border-bottom:1px solid var(--rule)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
+.toolbar .title{font-weight:700;margin-right:auto}
+.toolbar .title small{font-weight:400;color:var(--ink-2);margin-left:8px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;padding:3px;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:999px;cursor:pointer;font-size:14px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.tbtn{border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:14px}
+.tbtn[aria-pressed="true"]{background:var(--edit);border-color:var(--edit);color:#fff}
+.hint{flex-basis:100%;font-size:13px;color:var(--ink-2);margin:0;display:none}
+body.editing .hint{display:block}
+
+/* story badges */
+.story{display:none;font-size:11.5px;font-weight:700;color:var(--edit);border:1px solid var(--edit);border-radius:999px;padding:1px 8px;line-height:1.5;white-space:nowrap;cursor:help;vertical-align:middle}
+body.stories .story{display:inline-block}
+.storylist{display:none;margin:0;padding:14px clamp(16px,3vw,32px);border-bottom:1px solid var(--rule);background:var(--surface);font-size:13.5px;list-style:none;columns:2 420px;column-gap:40px}
+.storylist li{break-inside:avoid;margin:0 0 6px;display:flex;gap:8px;align-items:baseline}
+body.stories .storylist{display:block}
+body.stories .storylist .story{flex:none}
+
+/* ---------- Stage ---------- */
+.stage{display:grid;gap:40px;padding:32px clamp(12px,3vw,32px) 64px;align-items:start;justify-items:center}
+.stage[data-view="desktop"] .phone-wrap{display:none}
+.stage[data-view="mobile"] .desk-wrap{display:none}
+@media (min-width:1500px){ .stage[data-view="both"]{grid-template-columns:minmax(0,1fr) 410px;justify-items:stretch} .stage[data-view="both"] .phone-wrap{justify-self:center;position:sticky;top:90px} }
+.frame-label{font-size:13px;color:var(--ink-2);margin:0 0 10px 4px}
+.desk-wrap{width:100%;max-width:1280px;min-width:0}
+
+body.editing [data-e]:hover, body.editing [data-hours]:hover{outline:1px dashed var(--edit);outline-offset:2px;border-radius:2px;cursor:text}
+body.editing [data-hours]{background:color-mix(in srgb,var(--edit) 14%,transparent);border-radius:3px;padding:0 3px}
+
+/* ---------- Desktop frame ---------- */
+.browser{border:1px solid var(--rule);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 30px 60px -30px color-mix(in srgb,var(--ink) 35%,transparent)}
+.chrome{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
+.dots{display:flex;gap:6px}.dots i{width:11px;height:11px;border-radius:50%;background:var(--rule);display:block}
+.url{flex:1;max-width:420px;margin:0 auto;text-align:center;font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:4px 10px}
+.desk-scroll{overflow-x:auto}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-width:1080px}
+
+.side{background:var(--surface-2);border-right:1px solid var(--rule);padding:22px 18px;display:flex;flex-direction:column;gap:26px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.01em}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--ink-2);text-decoration:none;font-size:14.5px}
+.nav a.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 3px 0 0 var(--ink)}
+.side h3{font-size:13px;font-weight:600;color:var(--ink-3);margin:0 0 8px 10px}
+.courses{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.courses li{display:grid;grid-template-columns:10px 1fr;gap:10px;padding:0 10px;font-size:13.5px;line-height:1.3}
+.courses .sw{margin-top:4px}
+.courses b{display:block;font-weight:600}
+.courses span.n{color:var(--ink-2)}
+.conns{display:flex;flex-direction:column;gap:10px}
+.sync{border:1px solid var(--rule);border-radius:10px;padding:12px;background:var(--surface);font-size:13px;line-height:1.4}
+.sync b{display:flex;align-items:center;gap:7px;font-weight:600}
+.sync b::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.sync p{margin:4px 0 0;color:var(--ink-2)}
+.side .story{align-self:flex-start;margin:0 0 -18px 0}
+.sw{width:10px;height:10px;border-radius:3px;background:var(--cc);display:inline-block;flex:none}
+
+.main{padding:28px 34px 44px;display:flex;flex-direction:column;gap:34px;min-width:0}
+.head{display:flex;align-items:flex-end;gap:16px}
+.head h1{font-size:34px;line-height:1.1;letter-spacing:-.025em;margin:0;font-weight:800}
+.head p{margin:6px 0 0;color:var(--ink-2)}
+.head .actions{margin-left:auto;display:flex;gap:8px}
+.btn{border:1px solid var(--rule);background:var(--surface);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn.sm{padding:5px 10px;font-size:13px}
+
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:12px}
+.sec-head h2{font-size:18px;margin:0;font-weight:700;letter-spacing:-.01em}
+.sec-head p{margin:0;color:var(--ink-2);font-size:13.5px}
+
+/* Top three */
+.top3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--ink)}
+.pick{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:16px 22px 4px 0;margin-right:22px;border-right:1px solid var(--rule);align-content:start}
+.pick:last-child{border-right:0;margin-right:0}
+.pick .rank{grid-row:1 / span 4;font-size:40px;line-height:.9;font-weight:800;color:var(--cc);letter-spacing:-.04em}
+.pick .pt{font-weight:700;font-size:16.5px;line-height:1.25}
+.pick .pc{font-size:13px;color:var(--ink-2)}
+.pick .why{font-size:14px;line-height:1.45;margin:6px 0 10px;max-width:42ch}
+.pick .why b{font-weight:600}
+.pick .btn{justify-self:start}
+
+.stats{display:flex;flex-wrap:wrap;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.stat{padding:12px 30px 12px 0;margin-right:30px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:0}
+.stat .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.stat .l{font-size:13px;color:var(--ink-2)}
+.stat.alert .v{color:var(--line)}
+
+.upper{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:34px;align-items:start}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:-4px 0 10px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .ll{width:18px;border-top:2px dashed var(--line)}
+.chart svg{display:block;width:100%;height:auto}
+.chart text{font-family:var(--font);fill:var(--ink-2)}
+.chart .tot{fill:var(--ink);font-weight:600}
+.chart .tot.over,.chart .crunch{fill:var(--line);font-weight:700}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .free{stroke:var(--line);stroke-width:2;stroke-dasharray:6 5;fill:none}
+.chart .capmark{stroke:var(--line);fill:none;stroke-width:2}
+.chart .caplbl{fill:var(--line);font-weight:600}
+.chart .now{fill:var(--surface-2)}
+.freerow{display:grid;grid-template-columns:repeat(7,1fr);font-size:12px;color:var(--ink-2);text-align:center;margin-top:2px}
+.freerow-l{font-size:12px;color:var(--ink-3);margin:2px 0 0}
+.advice{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:14px;padding:13px 16px;border-left:3px solid var(--line);background:var(--line-soft);border-radius:0 8px 8px 0}
+.advice p{margin:0;max-width:72ch;font-size:14.5px}
+
+.dl-list{list-style:none;margin:0;padding:0}
+.dl{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--rule)}
+.dl-list .dl:first-child{border-top:1px solid var(--rule)}
+.dl .sw{margin-top:5px}
+.dl-t{font-weight:600;display:block;line-height:1.3}
+.dl-m{display:block;font-size:13px;color:var(--ink-2)}
+.dl-s{display:block;font-size:12.5px;color:var(--ink);margin-top:2px}
+.dl-h{font-weight:700;font-size:15px;white-space:nowrap;text-align:right}
+.dl-h small{display:block;font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.dl.done .dl-t{text-decoration:line-through;color:var(--ink-2)}
+.dl.done .dl-s{color:var(--ok)}
+.newtag{display:inline-block;font-size:11px;font-weight:700;color:var(--c1);border:1px solid currentColor;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.week-sep{font-size:13px;color:var(--ink-3);margin:16px 0 4px}
+.week-sep:first-child{margin-top:0}
+
+/* Plan */
+.missbar{display:flex;gap:14px;align-items:center;padding:11px 14px;margin-bottom:12px;border:1px solid var(--rule);border-left:3px solid var(--c2);border-radius:0 8px 8px 0;background:var(--surface-2);font-size:14px}
+.missbar p{margin:0;flex:1}
+.plan-legend{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin:-4px 0 10px}
+.plan-legend span{display:inline-flex;gap:6px;align-items:center}
+.plan-legend i{width:14px;height:10px;border-radius:2px;display:inline-block;background:var(--surface-2);border:1px solid var(--ink-3)}
+.plan-legend i.m{border-style:dashed}
+.plan-legend i.d{opacity:.45;background:var(--ink-3)}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.day{border-right:1px solid var(--rule);min-height:280px;display:flex;flex-direction:column}
+.day:last-child{border-right:0}
+.day-h{padding:9px 9px 8px;border-bottom:1px solid var(--rule);background:var(--surface-2);display:flex;align-items:baseline;gap:5px}
+.day-h b{font-size:14px}
+.day-h span{font-size:13px;color:var(--ink-2)}
+.day-h em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink-3)}
+.day.past .day-h{color:var(--ink-3)}
+.day.today .day-h{background:var(--ink);color:var(--surface)}
+.day.today .day-h span,.day.today .day-h em{color:color-mix(in srgb,var(--surface) 75%,transparent)}
+.blocks{padding:7px;display:flex;flex-direction:column;gap:6px}
+.blk{border-radius:6px;padding:7px 8px 8px;background:color-mix(in srgb,var(--cc) 13%,var(--surface));border-left:3px solid var(--cc);display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.3}
+.blk-time{color:var(--ink-2);font-size:11.5px}
+.blk-title{font-weight:600;color:var(--ink)}
+.blk-c{color:var(--ink-2);font-size:11.5px}
+.blk.done{opacity:.5}
+.blk.missed{background:transparent;border:1px dashed var(--ink-3);border-left:3px dashed var(--cc)}
+.blk.missed .blk-title{text-decoration:line-through;color:var(--ink-2)}
+.tag{align-self:flex-start;margin-top:3px;font-size:11px;font-weight:700;border:1px solid currentColor;border-radius:4px;padding:0 5px}
+.tag.due{color:var(--line)}
+.tag.moved{color:var(--c2)}
+.tag.ok{color:var(--ok)}
+.tag.miss{color:var(--ink-2)}
+
+/* Team + API */
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px;align-items:start}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ok)}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+@media (prefers-reduced-motion:no-preference){ .live::before{animation:pulse 2s ease-in-out infinite} @keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 0%,transparent)}} }
+.team-meta{font-size:13.5px;color:var(--ink-2);margin:-6px 0 12px}
+.member{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule)}
+.member:first-of-type{border-top:1px solid var(--rule)}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:color-mix(in srgb,var(--cc) 22%,var(--surface));color:var(--ink);border:1.5px solid var(--cc)}
+.member b{font-size:14px;display:block}
+.member .r{font-size:12.5px;color:var(--ink-2)}
+.pbar{height:6px;border-radius:3px;background:var(--surface-2);border:1px solid var(--rule);margin-top:5px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--cc)}
+.member .p{text-align:right;font-weight:700;font-size:14px}
+.member .p small{display:block;font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.feed{list-style:none;margin:12px 0 0;padding:0;font-size:13px}
+.feed li{display:flex;gap:10px;padding:4px 0;color:var(--ink-2)}
+.feed li b{color:var(--ink);font-weight:600}
+.feed li time{margin-left:auto;white-space:nowrap;color:var(--ink-3)}
+.feed li.block b{color:var(--line)}
+
+.token{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--surface-2);font-family:var(--mono);font-size:13px}
+.token span{flex:1}
+.endpoints{list-style:none;margin:12px 0;padding:0;font-size:13px}
+.endpoints li{display:grid;grid-template-columns:52px 210px 1fr;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.endpoints code{font-family:var(--mono);font-size:12.5px}
+.endpoints .m{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--c1)}
+.endpoints .m.post{color:var(--c2)}
+.endpoints span:last-child{color:var(--ink-2)}
+pre.code{margin:0;padding:12px 14px;border-radius:8px;background:#13202C;color:#DCE5EA;border:1px solid var(--rule);font-family:var(--mono);font-size:12px;line-height:1.55;overflow-x:auto}
+.api-links{display:flex;gap:16px;margin-top:10px;font-size:13.5px}
+.api-links a{color:var(--edit);font-weight:600}
+
+/* ---------- Phone frame ---------- */
+.phone-wrap{width:100%;max-width:410px;display:flex;flex-direction:column;align-items:center}
+.phone-wrap .frame-label{align-self:flex-start}
+.phone{width:390px;max-width:100%;height:820px;border-radius:52px;border:11px solid var(--bezel);background:var(--paper);position:relative;overflow:hidden;box-shadow:0 30px 60px -30px color-mix(in srgb,var(--ink) 45%,transparent)}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:30px;border-radius:20px;background:var(--bezel);z-index:3}
+.statusbar{height:50px;display:flex;align-items:center;justify-content:space-between;padding:6px 28px 0;font-weight:600;font-size:14px}
+.m-scroll{position:absolute;inset:50px 0 76px;overflow-y:auto;padding:6px 18px 28px}
+.m-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.m-top .brand{font-size:16px}
+.m-date{font-size:13px;color:var(--ink-2)}
+.m-h1{font-size:28px;font-weight:800;letter-spacing:-.025em;margin:12px 0 4px;line-height:1.1}
+.m-pick{display:grid;grid-template-columns:28px 1fr;gap:2px 10px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.m-pick .rank{grid-row:1 / span 3;font-size:28px;font-weight:800;line-height:1;color:var(--cc)}
+.m-pick b{font-size:15px}
+.m-pick .pc{font-size:12.5px;color:var(--ink-2)}
+.m-pick .why{font-size:13.5px;margin-top:3px}
+.m-missed{margin-top:14px;padding:11px 13px;border-left:3px solid var(--c2);background:var(--surface);border-radius:0 12px 12px 0;font-size:13.5px;border:1px solid var(--rule);border-left-width:3px}
+.m-missed p{margin:0}
+.m-sec{margin-top:26px}
+.m-sec h2{font-size:17px;margin:0 0 6px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.m-sec .sub{font-size:13px;color:var(--ink-2);margin:-2px 0 10px}
+.m-load{display:flex;align-items:baseline;gap:6px}
+.m-load .big{font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.m-load small{font-size:15px;font-weight:600;color:var(--ink-2)}
+.m-status{font-weight:600;color:var(--line);margin-top:3px;font-size:14px}
+.m-status.ok{color:var(--ok)}
+.loadbar{position:relative;height:12px;border-radius:6px;background:var(--surface-2);border:1px solid var(--rule);margin:12px 0 6px}
+.loadbar .fill{position:absolute;inset:0 auto 0 0;border-radius:6px;background:var(--ink)}
+.loadbar .over{position:absolute;top:0;bottom:0;background:var(--line);border-radius:0 6px 6px 0}
+.loadbar .mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--line)}
+.loadbar-l{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)}
+.m-card{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:12px 12px 8px;margin-top:14px}
+.m-card .sub{font-size:12.5px;color:var(--ink-2);margin:0 0 4px}
+.m-team{display:flex;align-items:center;gap:10px;margin:8px 0}
+.m-team .avs{display:flex}
+.m-team .av{width:30px;height:30px;font-size:11px;margin-left:-6px}
+.m-team .av:first-child{margin-left:0}
+.m-team .pct{margin-left:auto;font-weight:700}
+.m-feed{font-size:13px;color:var(--ink-2);margin:6px 0 0}
+.m-feed b{color:var(--ink)}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:76px;background:var(--surface);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 6px 18px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--ink-3);background:none;border:0;padding:0;font-family:inherit;cursor:pointer}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tab.on{color:var(--ink);font-weight:600}
+
+/* ---------- Availability (US-06) ---------- */
+.view{display:flex;flex-direction:column;gap:34px;min-width:0}
+.view[hidden]{display:none}
+.sec-head[id]{scroll-margin-top:84px}
+.m-sec h2[id],.m-missed[id]{scroll-margin-top:8px}
+.crumb{font-size:13px;color:var(--ink-3);margin:0 0 6px}
+.av-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px;align-items:start}
+.av-rows{border-top:2px solid var(--ink)}
+.av-row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule)}
+.av-row b{font-size:14.5px}
+.av-bar{height:8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--rule);overflow:hidden}
+.av-bar i{display:block;height:100%;background:var(--c1)}
+.step{display:inline-flex;align-items:center;gap:6px}
+.step button{width:30px;height:30px;border-radius:8px;border:1px solid var(--rule);background:var(--surface);cursor:pointer;font-size:17px;line-height:1;padding:0}
+.step button:disabled{opacity:.35;cursor:default}
+.step output{min-width:46px;text-align:center;font-weight:700}
+.av-tools{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.av-msg{font-size:12.5px;color:var(--line);margin:0 0 8px}
+.av-msg:empty{display:none}
+.off-add{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.off-add input{font:inherit;font-size:14px;border:1px solid var(--rule);border-radius:8px;padding:6px 10px;background:var(--surface);color:var(--ink);min-width:0}
+.off-add input[type="text"]{flex:1 1 140px}
+.off-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.off-list li{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.off-list .n{display:block;font-size:12.5px;color:var(--ink-2)}
+.off-list .x{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.recalc{font-weight:600;color:var(--line);font-size:14px;margin:12px 0 4px}
+.recalc.ok{color:var(--ok)}
+.note{font-size:13px;color:var(--ink-2);margin:12px 0 0;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--surface-2)}
+.m-note{font-size:13px;color:var(--ink-2);margin:0 0 10px}
+.m-avail-hide[hidden]{display:none}
+
+@media (prefers-reduced-motion:no-preference){ .chart rect.bar{transition:y .25s, height .25s} .loadbar .fill,.loadbar .over{transition:width .25s,left .25s} }
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="title">Loadline <small>mockup, desktop and mobile</small></div>
+  <div class="seg" role="group" aria-label="View">
+    <button type="button" data-view="desktop" aria-pressed="false">Desktop</button>
+    <button type="button" data-view="mobile" aria-pressed="false">Mobile</button>
+    <button type="button" data-view="both" aria-pressed="true">Both</button>
+  </div>
+  <button type="button" class="tbtn" id="storyBtn" aria-pressed="false">Show user stories</button>
+  <button type="button" class="tbtn" id="editBtn" aria-pressed="false">Edit text</button>
+  <button type="button" class="tbtn" id="resetBtn">Reset edits</button>
+  <p class="hint">Click any text to change it. Change an hour estimate and the forecast redraws. To change study hours, open Settings. Edits are saved in this browser.</p>
+</header>
+<ul class="storylist" id="storyList"></ul>
+
+<main class="stage" id="stage" data-view="both">
+
+  <!-- ================= DESKTOP ================= -->
+  <section class="desk-wrap" aria-label="Desktop mockup">
+    <p class="frame-label">Desktop, 1280 wide</p>
+    <div class="browser">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url" data-e>loadline.app/today</div></div>
+      <div class="desk-scroll">
+        <div class="app">
+          <aside class="side">
+            <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--line)" stroke-width="2.2"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--line)" stroke-width="2.2"/></svg><span data-e>Loadline</span></div>
+            <nav class="nav">
+              <a href="#" class="on" data-nav="today" data-e>Today</a>
+              <a href="#" data-go="sec-forecast" data-e>Forecast</a>
+              <a href="#" data-go="sec-plan" data-e>Work plan</a>
+              <a href="#" data-go="sec-deadlines" data-e>Deadlines</a>
+              <a href="#" data-go="sec-group" data-e>Group projects</a>
+              <a href="#" data-go="sec-api" data-e>Developer API</a>
+              <a href="#" data-nav="avail" data-e>Settings</a>
+            </nav>
+            <div>
+              <h3 data-e>Courses from Canvas</h3>
+              <ul class="courses" id="dCourses"></ul>
+            </div>
+            <div class="conns" style="margin-top:auto">
+              <span class="story" data-s="1">Story 1</span>
+              <div class="sync">
+                <b data-e>Canvas connected</b>
+                <p data-e>4 courses, 15 assignments imported. Checks for changes every 30 minutes; last synced 2 minutes ago.</p>
+              </div>
+              <span class="story" data-us="6">US-06</span>
+              <div class="sync">
+                <b data-e>Study hours set by you</b>
+                <p><span data-out="weekSum">22</span>h a week, <span data-out="offLabel">2 dates</span> marked unavailable. Change them in Settings.</p>
+              </div>
+            </div>
+          </aside>
+
+          <div class="main">
+            <div class="view" id="dToday">
+            <div class="head">
+              <div>
+                <h1 data-e>Wednesday, Nov 4</h1>
+                <p data-e>Week of Nov 2. Your plan was updated this morning after Tuesday’s missed session.</p>
+              </div>
+              <div class="actions"><button class="btn" type="button" data-e>Sync now</button><button class="btn primary" type="button" data-e>Rebuild plan</button></div>
+            </div>
+
+            <!-- Story 4 -->
+            <section>
+              <div class="sec-head"><h2 data-e>Start here: today’s top three</h2><p data-e>Ranked by deadline, hours left and what it unblocks</p><span class="story" data-s="4">Story 4</span></div>
+              <div class="top3" id="dTop3"></div>
+            </section>
+
+            <!-- Story 2 stats -->
+            <div class="stats">
+              <div class="stat"><div class="v"><span data-out="planned">0</span>h</div><div class="l" data-e>Work planned this week</div></div>
+              <div class="stat"><div class="v"><span data-out="free0">22</span>h</div><div class="l" data-e>Study hours this week</div></div>
+              <div class="stat" id="dStatOver"><div class="v" data-out="delta">0h</div><div class="l" data-out="deltaLabel">More than your study hours</div></div>
+              <div class="stat" id="dStatCrunch"><div class="v" data-out="crunch">0</div><div class="l" data-e>Crunch weeks before finals</div></div>
+            </div>
+
+            <div class="upper">
+              <!-- Story 2 -->
+              <section>
+                <div class="sec-head" id="sec-forecast"><h2 data-e>Seven-week forecast</h2><p data-e>Hours of work against the study hours you set</p><span class="story" data-s="2">Story 2</span></div>
+                <div class="legend" id="dLegend"></div>
+                <div class="chart"><svg id="dChart" role="img" aria-label="Weekly workload compared with your study hours"></svg></div>
+                <div class="freerow" id="dFreeRow"></div>
+                <div class="advice">
+                  <p id="dAdvice" aria-live="polite"></p>
+                  <button class="btn" type="button" id="dAdviceBtn">Move 8h earlier</button>
+                </div>
+              </section>
+
+              <!-- Story 1 -->
+              <section>
+                <div class="sec-head" id="sec-deadlines"><h2 data-e>Deadlines from Canvas</h2><span class="story" data-s="1">Story 1</span></div>
+                <div id="dDeadlines"></div>
+              </section>
+            </div>
+
+            <!-- Story 3 -->
+            <section>
+              <div class="sec-head" id="sec-plan"><h2 data-e>Work plan</h2><p data-e>Scheduled backward from each due date, inside your study hours</p><span class="story" data-s="3">Story 3</span></div>
+              <div class="missbar">
+                <p data-e>You missed Homework 3 on Tuesday (2.5h). It’s been moved to today at 16:00 and Thursday at 13:00, and Sunday’s deadline is still on track.</p>
+                <button class="btn sm" type="button" data-e>Undo</button>
+                <button class="btn sm" type="button" data-e>Pick other times</button>
+              </div>
+              <div class="plan-legend"><span><i class="d"></i><span data-e>Done</span></span><span><i class="m"></i><span data-e>Missed</span></span><span><i></i><span data-e>Scheduled</span></span></div>
+              <div class="days" id="dDays"></div>
+            </section>
+
+            <div class="lower">
+              <!-- Story 5 -->
+              <section>
+                <div class="sec-head" id="sec-group"><h2 data-e>NLP final project</h2><span class="live" data-e>Live</span><span class="story" data-s="5">Story 5</span></div>
+                <p class="team-meta" data-e>CS 6120 group, due Dec 10.</p>
+                <div id="dTeam"></div>
+                <ul class="feed" id="dFeed"></ul>
+              </section>
+
+              <!-- Story 6 -->
+              <section>
+                <div class="sec-head" id="sec-api"><h2 data-e>Developer API</h2><p data-e>Read your plan from your own scripts</p><span class="story" data-s="6">Story 6</span></div>
+                <div class="token"><span data-e>ll_live_••••••••••••3f9a</span><button class="btn sm" type="button" data-e>Copy</button><button class="btn sm" type="button" data-e>New token</button></div>
+                <ul class="endpoints">
+                  <li><span class="m">GET</span><code data-e>/v1/plan?week=2026-11-02</code><span data-e>Sessions for a week</span></li>
+                  <li><span class="m">GET</span><code data-e>/v1/forecast</code><span data-e>Hours and study hours per week</span></li>
+                  <li><span class="m">GET</span><code data-e>/v1/deadlines</code><span data-e>All imported assignments</span></li>
+                  <li><span class="m post">POST</span><code data-e>/v1/sessions/{id}/complete</code><span data-e>Mark a session done</span></li>
+                </ul>
+<pre class="code" data-e>curl https://api.loadline.app/v1/plan?week=2026-11-02 \
+  -H "Authorization: Bearer $LOADLINE_TOKEN"
+
+{
+  "week": "2026-11-02",
+  "available_hours": 22,
+  "planned_hours": 26.6,
+  "sessions": [
+    { "task": "Problem set 4", "course": "CS 5100",
+      "start": "2026-11-04T09:30", "hours": 2.5,
+      "status": "scheduled" }
+  ]
+}</pre>
+                <div class="api-links"><a href="#" data-e>API reference</a><a href="#" data-e>OpenAPI spec</a><a href="#" data-e>Webhooks</a></div>
+              </section>
+            </div>
+            </div>
+
+            <div class="view" id="dAvail" hidden>
+              <div class="head">
+                <div>
+                  <p class="crumb" data-e>Settings → Availability</p>
+                  <h1 data-e>Your study hours</h1>
+                  <p data-e>You decide how many hours you can study each day. Loadline plans your work inside them.</p>
+                </div>
+                <div class="actions"><button class="btn" type="button" data-av-reset>Reset to defaults</button></div>
+              </div>
+              <div class="av-grid">
+                <div>
+                  <section>
+                    <div class="sec-head"><h2 data-e>Study hours per day</h2><p data-e>Starts with 3h on weekdays (2h on Fridays) and 4h on weekends. Change any day.</p><span class="story" data-us="6">US-06</span></div>
+                    <div class="av-rows" data-avrows></div>
+                    <div class="av-tools"><span class="av-def"></span></div>
+                  </section>
+                  <section style="margin-top:34px">
+                    <div class="sec-head"><h2 data-e>Dates you’re unavailable</h2><p data-e>No work is planned on these days.</p><span class="story" data-us="6">US-06</span></div>
+                    <p class="av-msg" role="status"></p>
+                    <div class="off-add"><input type="date" min="2026-11-02" max="2026-12-20" aria-label="Date you’re unavailable"><input type="text" placeholder="Reason (optional)" maxlength="60" aria-label="Reason"><button class="btn" type="button" data-off-add>Mark unavailable</button></div>
+                    <ul class="off-list" data-offlist></ul>
+                  </section>
+                </div>
+                <section class="av-effect">
+                  <div class="sec-head"><h2 data-e>What this does to your plan</h2><p data-e>Updates as soon as you change anything</p><span class="story" data-us="6">US-06</span></div>
+                  <div class="stats">
+                    <div class="stat"><div class="v"><span data-out="free0">22</span>h</div><div class="l" data-e>Study hours this week</div></div>
+                    <div class="stat"><div class="v"><span data-out="planned">0</span>h</div><div class="l" data-e>Work planned this week</div></div>
+                    <div class="stat"><div class="v" data-out="crunch">0</div><div class="l" data-e>Crunch weeks before finals</div></div>
+                  </div>
+                  <p class="recalc" role="status" data-out="statusLine"></p>
+                  <div class="chart"><svg id="aChart" role="img" aria-label="Weekly workload compared with your study hours"></svg></div>
+                  <p class="note" data-e>Loadline doesn’t read your calendar in this version. The hours you set here are what it plans around.</p>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MOBILE ================= -->
+  <section class="phone-wrap" aria-label="Mobile mockup">
+    <p class="frame-label">Mobile, 390 wide</p>
+    <div class="phone">
+      <div class="island"></div>
+      <div class="statusbar"><span>9:41</span><span aria-hidden="true">●●● ▮</span></div>
+      <div class="m-scroll">
+        <div id="mToday">
+        <div class="m-top">
+          <div class="brand"><svg width="20" height="20" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--line)" stroke-width="2.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--line)" stroke-width="2.4"/></svg><span data-e>Loadline</span></div>
+          <span class="m-date" data-e>Wed, Nov 4</span>
+        </div>
+
+        <h1 class="m-h1"><span data-e>Today’s top three</span> <span class="story" data-s="4">Story 4</span></h1>
+        <div id="mTop3"></div>
+
+        <div class="m-missed" id="m-plan"><span class="story" data-s="3">Story 3</span><p data-e>Missed Homework 3 on Tuesday. Moved to today 16:00 and Thursday 13:00.</p></div>
+
+        <div class="m-sec">
+          <h2 id="m-forecast"><span data-e>This week</span> <span class="story" data-s="2">Story 2</span></h2>
+          <div class="m-load"><span class="big" data-out="planned">0</span><small><span data-e>h of work,</span> <span data-out="free0">22</span><span data-e>h of study time</span></small></div>
+          <div class="m-status" id="mStatus" data-out="statusLine"></div>
+          <div class="loadbar" id="mBar"><div class="fill"></div><div class="over"></div><div class="mark"></div></div>
+          <div class="loadbar-l"><span>0h</span><span data-e>Study hours</span></div>
+          <div class="m-card">
+            <p class="sub" data-e>Next 7 weeks. Dashed line is your study hours.</p>
+            <div class="chart"><svg id="mChart" role="img" aria-label="Weekly workload compared with your study hours"></svg></div>
+          </div>
+        </div>
+
+        <div class="m-sec">
+          <h2 id="m-team"><span data-e>NLP final project</span> <span class="live" data-e>Live</span> <span class="story" data-s="5">Story 5</span></h2>
+          <div class="m-team"><div class="avs" id="mAvs"></div></div>
+          <p class="m-feed" id="mFeed"></p>
+        </div>
+
+        <div class="m-sec">
+          <h2><span data-e>Due soon</span> <span class="story" data-s="1">Story 1</span></h2>
+          <p class="sub" data-e>Imported from Canvas automatically</p>
+          <div id="mDeadlines"></div>
+        </div>
+        </div>
+        <div id="mAvail" hidden>
+          <div class="m-top">
+            <div class="brand"><svg width="20" height="20" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--line)" stroke-width="2.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--line)" stroke-width="2.4"/></svg><span data-e>Loadline</span></div>
+            <span class="m-date" data-e>Settings</span>
+          </div>
+          <h1 class="m-h1"><span data-e>Your study hours</span> <span class="story" data-us="6">US-06</span></h1>
+          <p class="m-note" data-e>Set the hours you can study each day. Starts with 3h on weekdays (2h on Fridays) and 4h on weekends.</p>
+          <div class="av-rows" data-avrows></div>
+          <div class="av-tools"><span class="av-def"></span><button class="btn sm" type="button" data-av-reset>Reset</button></div>
+          <div class="m-sec">
+            <h2><span data-e>Dates you’re unavailable</span></h2>
+            <p class="av-msg" role="status"></p>
+            <div class="off-add"><input type="date" min="2026-11-02" max="2026-12-20" aria-label="Date you’re unavailable"><input type="text" placeholder="Reason (optional)" maxlength="60" aria-label="Reason"><button class="btn sm" type="button" data-off-add>Mark unavailable</button></div>
+            <ul class="off-list" data-offlist></ul>
+          </div>
+          <div class="m-sec">
+            <h2><span data-e>Your plan now</span></h2>
+            <div class="m-load"><span class="big" data-out="planned">0</span><small><span data-e>h of work,</span> <span data-out="free0">22</span><span data-e>h of study time</span></small></div>
+            <div class="m-status" data-out="statusLine"></div>
+            <div class="m-card">
+              <p class="sub" data-e>Next 7 weeks. Dashed line is your study hours.</p>
+              <div class="chart"><svg id="mAChart" role="img" aria-label="Weekly workload compared with your study hours"></svg></div>
+            </div>
+            <p class="m-note" style="margin-top:12px" data-e>Loadline doesn’t read your calendar in this version.</p>
+          </div>
+        </div>
+      </div>
+      <nav class="tabbar">
+        <button type="button" class="tab on" data-mtab="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span data-e>Today</span></button>
+        <button type="button" class="tab" data-mgo="m-forecast"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V5M16 20v-8M22 20H2"/></svg><span data-e>Forecast</span></button>
+        <button type="button" class="tab" data-mgo="m-plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-e>Plan</span></button>
+        <button type="button" class="tab" data-mgo="m-team"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.6.3 4.3 2 5 5.4"/></svg><span data-e>Team</span></button>
+        <button type="button" class="tab" data-mtab="avail"><svg viewBox="0 0 24 24"><path d="M4 6h10M19 6h1M4 12h3M12 12h8M4 18h9M18 18h2"/><circle cx="16.5" cy="6" r="2"/><circle cx="9.5" cy="12" r="2"/><circle cx="15.5" cy="18" r="2"/></svg><span data-e>Settings</span></button>
+      </nav>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  /* ---------- User stories ---------- */
+  const STORIES = [
+    'As someone taking several courses, I want my Canvas deadlines in one place automatically, so I don’t track them by hand.',
+    'As someone caught off guard by busy weeks, I want to see each week’s workload against my free time, so I can spot crunch weeks early.',
+    'As someone who doesn’t know when to start, I want a plan that schedules work backward from due dates and adjusts when I miss a session, so I stop cramming.',
+    'As someone feeling overwhelmed, I want today’s top three tasks and why they matter, so I can just start.',
+    'As someone on a group project, I want to see my teammates’ progress live, so we stay in sync without status meetings.',
+    'As someone who builds my own tools, I want a documented API for my plan, so I can use my data outside the app.'
+  ];
+
+  const US06 = 'As someone whose time varies from week to week, I want to set my own study hours for each day and mark the dates I’m unavailable, so my plan fits my real schedule.';
+
+  /* ---------- Sample data ---------- */
+  const COURSES = [
+    {id:'ai',  code:'CS 5100', name:'Foundations of AI',            color:'var(--c1)'},
+    {id:'ml',  code:'DS 5220', name:'Supervised Machine Learning',  color:'var(--c2)'},
+    {id:'nlp', code:'CS 6120', name:'Natural Language Processing',  color:'var(--c3)'},
+    {id:'viz', code:'DS 5500', name:'Data Visualization',           color:'var(--c4)'}
+  ];
+  const WEEKS = ['Nov 2','Nov 9','Nov 16','Nov 23','Nov 30','Dec 7','Dec 14'];
+  const AV_DEFAULT = {hrs:[3,3,3,3,2,4,4], off:[{d:'2026-11-26', note:'Thanksgiving'},{d:'2026-12-12', note:'Friend’s wedding'}]};
+  const DAY_N = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const START = Date.UTC(2026,10,2), DAY_MS = 864e5;           // Mon, Nov 2, 2026
+  const iso = ms => new Date(ms).toISOString().slice(0,10);
+  const cloneAvail = a => ({hrs:a.hrs.slice(), off:a.off.map(o => ({d:o.d, note:o.note || ''}))});
+  const validAvail = a => !!a && Array.isArray(a.hrs) && a.hrs.length === 7 && a.hrs.every(h => typeof h === 'number' && h >= 0 && h <= 12) && Array.isArray(a.off) && a.off.every(o => o && /^\d{4}-\d{2}-\d{2}$/.test(o.d));
+  const TASKS_DEFAULT = [
+    {id:'t1', c:'nlp', title:'Reading response 6', due:'Tue, Nov 3',  week:0, d:3,  hours:3, done:true, plan:'Submitted Tuesday'},
+    {id:'t2', c:'ai',  title:'Problem set 4',       due:'Thu, Nov 5',  week:0, d:5,  hours:6, plan:'Started Mon, 2 of 6h done'},
+    {id:'t3', c:'viz', title:'Design critique 5',   due:'Fri, Nov 6',  week:0, d:6,  hours:2, plan:'Starts tonight'},
+    {id:'t4', c:'ml',  title:'Homework 3',          due:'Sun, Nov 8',  week:0, d:8,  hours:8, plan:'Missed Tue, rescheduled'},
+    {id:'t5', c:'ai',  title:'Midterm exam',        due:'Thu, Nov 12', week:1, d:12, hours:10, plan:'Review starts Fri, Nov 6'},
+    {id:'t6', c:'nlp', title:'Assignment 3',        due:'Fri, Nov 13', week:1, d:13, hours:9, plan:'Starts Thu, Nov 5', isNew:true},
+    {id:'t7', c:'nlp', title:'Project proposal',    due:'Thu, Nov 19', week:2, d:19, hours:5},
+    {id:'t8', c:'ml',  title:'Homework 4',          due:'Fri, Nov 20', week:2, d:20, hours:8},
+    {id:'t9', c:'ai',  title:'Problem set 5',       due:'Tue, Nov 24', week:3, d:24, hours:6},
+    {id:'t10',c:'viz', title:'Dashboard draft',     due:'Wed, Nov 25', week:3, d:25, hours:7},
+    {id:'t11',c:'ml',  title:'Project milestone',   due:'Thu, Dec 3',  week:4, d:33, hours:12},
+    {id:'t12',c:'nlp', title:'Final project',       due:'Thu, Dec 10', week:5, d:40, hours:20},
+    {id:'t13',c:'ai',  title:'Final project',       due:'Tue, Dec 15', week:6, d:45, hours:18},
+    {id:'t14',c:'ml',  title:'Final exam',          due:'Wed, Dec 16', week:6, d:46, hours:12},
+    {id:'t15',c:'viz', title:'Final dashboard',     due:'Thu, Dec 17', week:6, d:47, hours:10}
+  ];
+  // s: done | missed | moved | due | (scheduled)
+  const DAYS = [
+    {n:'Mon', d:'2', past:true, blocks:[
+      {c:'nlp', t:'9:00–11:00', title:'Reading response 6', h:2, s:'done'},
+      {c:'ai',  t:'14:00–16:00', title:'Problem set 4', h:2, s:'done'}]},
+    {n:'Tue', d:'3', past:true, blocks:[
+      {c:'nlp', t:'10:00–11:00', title:'Reading response 6', h:1, s:'done', note:'Submitted'},
+      {c:'ml',  t:'15:00–17:30', title:'Homework 3', h:2.5, s:'missed', note:'Missed, moved'}]},
+    {n:'Wed', d:'4', today:true, blocks:[
+      {c:'ai',  t:'9:30–12:00', title:'Problem set 4', h:2.5},
+      {c:'ml',  t:'13:00–15:00', title:'Homework 3', h:2},
+      {c:'ml',  t:'16:00–17:30', title:'Homework 3', h:1.5, s:'moved', note:'Moved from Tue'},
+      {c:'viz', t:'19:00–20:00', title:'Design critique 5', h:1}]},
+    {n:'Thu', d:'5', blocks:[
+      {c:'ai',  t:'10:00–11:30', title:'Problem set 4', h:1.5, s:'due', note:'Due 23:59'},
+      {c:'ml',  t:'13:00–14:00', title:'Homework 3', h:1, s:'moved', note:'Moved from Tue'},
+      {c:'nlp', t:'16:00–18:00', title:'Start assignment 3', h:2}]},
+    {n:'Fri', d:'6', blocks:[
+      {c:'viz', t:'9:00–10:00', title:'Design critique 5', h:1, s:'due', note:'Due 23:59'},
+      {c:'ml',  t:'11:00–13:00', title:'Homework 3', h:2},
+      {c:'ai',  t:'15:00–16:30', title:'Midterm review', h:1.5}]},
+    {n:'Sat', d:'7', blocks:[
+      {c:'ml',  t:'10:00–11:30', title:'Homework 3', h:1.5},
+      {c:'ai',  t:'13:00–15:30', title:'Midterm review', h:2.5}]},
+    {n:'Sun', d:'8', blocks:[
+      {c:'nlp', t:'14:00–15:36', title:'Assignment 3', h:1.6},
+      {c:'ml',  t:'23:59', title:'Homework 3 deadline', h:0, s:'due', note:'Due'}]}
+  ];
+  const TOP3 = [
+    {c:'ai',  title:'Problem set 4',     when:'9:30–12:00, 2.5h',          why:'Due tomorrow night and 4 of 6 hours are left. It’s the closest deadline you have.'},
+    {c:'ml',  title:'Homework 3',        when:'13:00–15:00 and 16:00–17:30', why:'You missed Tuesday’s session. Doing 3.5h today keeps Sunday’s deadline safe.'},
+    {c:'viz', title:'Design critique 5', when:'19:00–20:00, 1h',           why:'Small and due Friday. Finishing it tonight frees Friday morning for midterm review.'}
+  ];
+  const TEAM = [
+    {i:'You', name:'You',      role:'Model fine-tuning',   pct:20, last:'Active now',        cc:'var(--c3)'},
+    {i:'MK',  name:'Maya K.',  role:'Data cleaning',       pct:85, last:'12 min ago',        cc:'var(--c1)'},
+    {i:'AR',  name:'Arjun R.', role:'Evaluation scripts',  pct:40, last:'2 h ago',           cc:'var(--c2)'},
+    {i:'LC',  name:'Lina C.',  role:'Report and slides',   pct:10, last:'Yesterday',         cc:'var(--c4)'}
+  ];
+  const FEED = [
+    {who:'Maya', what:'finished “Remove duplicate tweets”', when:'12 min ago'},
+    {who:'Arjun', what:'started “BLEU and ROUGE scoring”', when:'2 h ago'},
+    {who:'Lina', what:'is waiting on Arjun’s results table', when:'Yesterday', block:true}
+  ];
+
+  /* ---------- State + storage ---------- */
+  const KEY = 'loadline-mockup-v3';
+  function readStore(){ try{ return JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ return null; } }
+  function writeStore(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  let state = Object.assign({text:{}, hours:{}, avail:null}, readStore() || {});
+  let tasks = TASKS_DEFAULT.map(t => Object.assign({}, t, state.hours[t.id] != null ? {hours: state.hours[t.id]} : {}));
+  let avail = cloneAvail(validAvail(state.avail) ? state.avail : AV_DEFAULT);
+  /* Study hours per week = the hours you set for each weekday, minus the days you marked unavailable */
+  function computeFree(){
+    const off = new Set(avail.off.map(o => o.d));
+    return WEEKS.map((_,w) => { let t = 0; for (let d = 0; d < 7; d++) if (!off.has(iso(START + (w*7+d)*DAY_MS))) t += avail.hrs[d]; return t; });
+  }
+  let free = computeFree();
+  const course = id => COURSES.find(c => c.id === id);
+  const fmt = v => (Math.round(v*10)/10).toString();
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const $ = id => document.getElementById(id);
+
+  /* Big tasks start the week before: 40% then, 60% the week they’re due */
+  function weekLoads(){
+    const rows = WEEKS.map(() => Object.fromEntries(COURSES.map(c => [c.id, 0])));
+    tasks.forEach(t => {
+      if (t.hours >= 8 && t.week > 0){ rows[t.week-1][t.c] += t.hours*0.4; rows[t.week][t.c] += t.hours*0.6; }
+      else rows[t.week][t.c] += t.hours;
+    });
+    return rows.map(r => ({by:r, total:Object.values(r).reduce((a,b)=>a+b,0)}));
+  }
+
+  /* ---------- Lists ---------- */
+  function renderStatic(){
+    $('storyList').innerHTML = STORIES.map((s,i) => `<li><span class="story">Story ${i+1}</span><span>${s}</span></li>`).join('');
+    $('storyList').insertAdjacentHTML('beforeend', `<li><span class="story">US-06</span><span>${US06}</span></li>`);
+    document.querySelectorAll('.story[data-s]').forEach(el => el.title = STORIES[el.dataset.s - 1]);
+    document.querySelectorAll('.story[data-us]').forEach(el => el.title = US06);
+
+    $('dCourses').innerHTML = COURSES.map(c =>
+      `<li style="--cc:${c.color}"><span class="sw"></span><div><b data-e data-key="course-${c.id}-code">${esc(c.code)}</b><span class="n" data-e data-key="course-${c.id}-name">${esc(c.name)}</span></div></li>`).join('');
+    $('dLegend').innerHTML = COURSES.map(c =>
+      `<span style="--cc:${c.color}"><i class="sw"></i><span data-e data-key="course-${c.id}-code">${esc(c.code)}</span></span>`).join('') +
+      `<span><i class="ll"></i><span data-e data-key="legend-free">Your study hours</span></span>`;
+
+    $('dTop3').innerHTML = TOP3.map((p,i) => `<div class="pick" style="--cc:${course(p.c).color}">
+        <span class="rank">${i+1}</span>
+        <span class="pt" data-e data-key="top-${i}-title">${esc(p.title)}</span>
+        <span class="pc"><span data-e data-key="course-${p.c}-code">${course(p.c).code}</span>, <span data-e data-key="top-${i}-when">${esc(p.when)}</span></span>
+        <p class="why" data-e data-key="top-${i}-why">${esc(p.why)}</p>
+        <button class="btn sm" type="button" style="grid-column:2" data-e data-key="top-btn">Start session</button></div>`).join('');
+    $('mTop3').innerHTML = TOP3.map((p,i) => `<div class="m-pick" style="--cc:${course(p.c).color}">
+        <span class="rank">${i+1}</span><b data-e data-key="top-${i}-title">${esc(p.title)}</b>
+        <span class="pc"><span data-e data-key="course-${p.c}-code">${course(p.c).code}</span>, <span data-e data-key="top-${i}-when">${esc(p.when)}</span></span>
+        <span class="why" data-e data-key="top-${i}-why">${esc(p.why)}</span></div>`).join('');
+
+    $('dDays').innerHTML = DAYS.map((day,i) => {
+      const tot = day.blocks.filter(b => b.s !== 'missed').reduce((a,b)=>a+b.h,0);
+      return `<div class="day${day.today?' today':''}${day.past?' past':''}"><div class="day-h"><b>${day.n}</b><span>${day.d}</span><em>${fmt(tot)}h</em></div><div class="blocks">` +
+        day.blocks.map((b,j) => {
+          const tagCls = {done:'ok', missed:'miss', moved:'moved', due:'due'}[b.s];
+          return `<div class="blk ${b.s||''}" style="--cc:${course(b.c).color}">
+          <span class="blk-time" data-e data-key="blk-${i}-${j}-time">${b.t}</span>
+          <span class="blk-title" data-e data-key="blk-${i}-${j}-title">${esc(b.title)}</span>
+          <span class="blk-c"><span data-e data-key="course-${b.c}-code">${course(b.c).code}</span>${b.h ? ', '+fmt(b.h)+'h' : ''}</span>
+          ${b.note ? `<span class="tag ${tagCls}" data-e data-key="blk-${i}-${j}-note">${esc(b.note)}</span>` : ''}</div>`;
+        }).join('') + `</div></div>`;
+    }).join('');
+
+    const upcoming = tasks.filter(t => t.week <= 1).sort((a,b)=>a.d-b.d);
+    const row = t => `<li class="dl${t.done?' done':''}" style="--cc:${course(t.c).color}"><span class="sw"></span>
+        <div><span class="dl-t"><span data-e data-key="task-${t.id}-title">${esc(t.title)}</span>${t.isNew ? '<span class="newtag" data-e data-key="newtag">New from Canvas</span>' : ''}</span>
+        <span class="dl-m"><span data-e data-key="course-${t.c}-code">${course(t.c).code}</span>, due <span data-e data-key="task-${t.id}-due">${esc(t.due)}</span></span>
+        ${t.plan ? `<span class="dl-s" data-e data-key="task-${t.id}-plan">${esc(t.plan)}</span>` : ''}</div>
+        <span class="dl-h"><span data-hours="${t.id}">${fmt(t.hours)}</span>h<small>estimate</small></span></li>`;
+    $('dDeadlines').innerHTML =
+      `<p class="week-sep" data-e data-key="sep-this">This week</p><ul class="dl-list">${upcoming.filter(t=>t.week===0).map(row).join('')}</ul>` +
+      `<p class="week-sep" data-e data-key="sep-next">Next week</p><ul class="dl-list">${upcoming.filter(t=>t.week===1).map(row).join('')}</ul>`;
+    $('mDeadlines').innerHTML = `<ul class="dl-list">${upcoming.filter(t=>!t.done).slice(0,4).map(row).join('')}</ul>`;
+
+    $('dTeam').innerHTML = TEAM.map((m,i) => `<div class="member" style="--cc:${m.cc}"><span class="av" data-e data-key="tm-${i}-i">${esc(m.i)}</span>
+        <div><b data-e data-key="tm-${i}-name">${esc(m.name)}</b><span class="r" data-e data-key="tm-${i}-role">${esc(m.role)}</span><div class="pbar"><i style="width:${m.pct}%"></i></div></div>
+        <span class="p"><small data-e data-key="tm-${i}-last">${esc(m.last)}</small></span></div>`).join('');
+    $('dFeed').innerHTML = FEED.map((f,i) => `<li class="${f.block?'block':''}"><span><b data-e data-key="fd-${i}-who">${esc(f.who)}</b> <span data-e data-key="fd-${i}-what">${esc(f.what)}</span></span><time data-e data-key="fd-${i}-when">${esc(f.when)}</time></li>`).join('');
+    $('mAvs').innerHTML = TEAM.map((m,i) => `<span class="av" style="--cc:${m.cc}" data-e data-key="tm-${i}-i">${esc(m.i)}</span>`).join('');
+    $('mFeed').innerHTML = `<b data-e data-key="fd-0-who">${esc(FEED[0].who)}</b> <span data-e data-key="fd-0-what">${esc(FEED[0].what)}</span>, <span data-e data-key="fd-0-when">${esc(FEED[0].when)}</span>. <b data-e data-key="fd-2-who">${esc(FEED[2].who)}</b> <span data-e data-key="fd-2-what">${esc(FEED[2].what)}</span>.`;
+  }
+
+  /* ---------- Chart ---------- */
+  const DW = 640, DPL = 34, DPR = 120;
+  function renderChart(svg, compact){
+    const loads = weekLoads();
+    const W = compact ? 330 : DW, H = compact ? 160 : 270;
+    const pL = compact ? 4 : DPL, pR = compact ? 4 : DPR, pT = compact ? 20 : 26, pB = compact ? 34 : 38;
+    const maxV = Math.ceil(Math.max(...free, ...loads.map(l=>l.total)) * 1.12 / 5) * 5;
+    const y = v => pT + (H-pT-pB) * (1 - v/maxV);
+    const slot = (W-pL-pR)/WEEKS.length, bw = slot*(compact ? .6 : .5);
+    let s = `<rect class="now" x="${pL}" y="${pT-14}" width="${slot}" height="${H-pT-pB+14}" rx="6"/>`;
+    if (!compact) for (let g=0; g<=maxV; g+=10) s += `<line class="grid" x1="${pL}" x2="${W-pR}" y1="${y(g)}" y2="${y(g)}"/><text x="${pL-8}" y="${y(g)+4}" text-anchor="end" font-size="11">${g}</text>`;
+    loads.forEach((l,i) => {
+      const x = pL + slot*i + (slot-bw)/2; let acc = 0; const over = l.total > free[i];
+      COURSES.forEach(c => { const v = l.by[c.id]; if (!v) return;
+        s += `<rect class="bar" x="${x}" y="${y(acc+v)}" width="${bw}" height="${Math.max(0,y(acc)-y(acc+v)-1)}" rx="2" style="fill:${c.color}"><title>${c.code}: ${fmt(v)}h</title></rect>`; acc += v; });
+      s += `<text class="tot${over?' over':''}" x="${x+bw/2}" y="${y(l.total)-6}" text-anchor="middle" font-size="${compact?10.5:12.5}">${fmt(l.total)}${compact?'':'h'}</text>`;
+      s += `<text x="${x+bw/2}" y="${H-pB+(compact?14:18)}" text-anchor="middle" font-size="${compact?10:12}"${i===0?' style="fill:var(--ink);font-weight:600"':''}>${WEEKS[i]}</text>`;
+      if (over) s += `<text class="crunch" x="${x+bw/2}" y="${H-pB+(compact?27:33)}" text-anchor="middle" font-size="${compact?9.5:11.5}">crunch</text>`;
+    });
+    let d = '';
+    free.forEach((f,i) => { const x0 = pL + slot*i, x1 = x0 + slot; d += (i ? `L${x0},${y(f)}` : `M${x0},${y(f)}`) + `L${x1},${y(f)}`; });
+    s += `<path class="free" d="${d}"/>`;
+    if (!compact){
+      const fy = y(free[free.length-1]), mx = W-pR+26;
+      s += `<circle class="capmark" cx="${mx}" cy="${fy}" r="11"/><line class="capmark" x1="${mx-18}" x2="${mx+18}" y1="${fy}" y2="${fy}"/>`;
+      s += `<text class="caplbl" x="${mx+22}" y="${fy-3}" font-size="12">Study</text><text class="caplbl" x="${mx+22}" y="${fy+12}" font-size="12">hours</text>`;
+    }
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = s;
+  }
+  function renderFreeRow(){
+    const row = $('dFreeRow');
+    row.style.paddingLeft = (DPL/DW*100) + '%'; row.style.paddingRight = (DPR/DW*100) + '%';
+    row.innerHTML = free.map(f => `<span>${fmt(f)}h avail.</span>`).join('');
+  }
+
+  /* ---------- Derived numbers ---------- */
+  function renderAdvice(loads){
+    const p = $('dAdvice'), b = $('dAdviceBtn');
+    const over = loads.map((l,i) => l.total - free[i]);
+    const crunchIdx = over.map((d,i) => d > 0 ? i : -1).filter(i => i >= 0);
+    if (!crunchIdx.length){ p.textContent = 'No crunch weeks ahead. Your study hours cover the work in every week.'; b.hidden = true; return; }
+    const worst = crunchIdx.reduce((a,i) => over[i] > over[a] ? i : a, crunchIdx[0]);
+    let spareIdx = -1, spare = 0;
+    for (let i = 0; i < worst; i++){ const sp = free[i] - loads[i].total; if (sp > spare){ spare = sp; spareIdx = i; } }
+    const n = crunchIdx.length, word = ['No','One','Two','Three','Four','Five','Six','Seven'][n];
+    const head = `${word} crunch ${n === 1 ? 'week' : 'weeks'} ahead. The week of ${WEEKS[worst]} has ${fmt(loads[worst].total)}h of work and ${fmt(free[worst])}h of study time.`;
+    if (spareIdx < 0 || spare < 1){ p.textContent = head + ' No earlier week has room to take work, so try adding study hours.'; b.hidden = true; return; }
+    const move = Math.min(8, Math.floor(spare));
+    p.textContent = `${head} The week of ${WEEKS[spareIdx]} has ${fmt(spare)}h to spare, so moving ${move}h of work there brings ${WEEKS[worst]} down to about ${fmt(loads[worst].total - move)}h.`;
+    b.hidden = false; b.textContent = `Move ${move}h earlier`;
+  }
+  function renderNumbers(){
+    free = computeFree();
+    const loads = weekLoads(), planned = loads[0].total, cap = free[0], delta = planned - cap, over = delta > 0;
+    const crunch = loads.filter((l,i) => l.total > free[i]).length;
+    const out = (k, v) => document.querySelectorAll(`[data-out="${k}"]`).forEach(e => e.textContent = v);
+    out('planned', fmt(planned)); out('free0', fmt(cap));
+    out('delta', fmt(Math.abs(delta)) + 'h');
+    out('deltaLabel', over ? 'More than your study hours' : 'Study hours left over');
+    out('crunch', crunch);
+    out('statusLine', over ? `${fmt(delta)}h more than your study hours` : `${fmt(-delta)}h of study time to spare`);
+    
+    out('weekSum', fmt(avail.hrs.reduce((a,b) => a+b, 0)));
+    out('offLabel', avail.off.length === 1 ? '1 date' : `${avail.off.length} dates`);
+    $('dStatOver').classList.toggle('alert', over);
+    $('dStatCrunch').classList.toggle('alert', crunch > 0);
+    document.querySelectorAll('[data-out="statusLine"]').forEach(e => e.classList.toggle('ok', !over));
+
+    const bar = $('mBar'), scale = Math.max(planned, cap) * 1.15 || 1;
+    bar.querySelector('.fill').style.width = (Math.min(planned,cap)/scale*100) + '%';
+    const ov = bar.querySelector('.over');
+    ov.style.left = (cap/scale*100) + '%'; ov.style.width = (over ? delta/scale*100 : 0) + '%';
+    bar.querySelector('.mark').style.left = `calc(${cap/scale*100}% - 1px)`;
+    renderFreeRow(); renderAdvice(loads);
+    renderChart($('dChart'), false); renderChart($('mChart'), true);
+    renderChart($('aChart'), true); renderChart($('mAChart'), true);
+  }
+
+  /* ---------- Availability screen (US-06) ---------- */
+  const isDefaultAvail = () => avail.hrs.every((h,i) => h === AV_DEFAULT.hrs[i]) && avail.off.length === AV_DEFAULT.off.length && avail.off.every((o,i) => o.d === AV_DEFAULT.off[i].d);
+  function renderAvail(){
+    const rows = DAY_N.map((n,d) => { const h = avail.hrs[d];
+      return `<div class="av-row"><b>${n}</b><div class="av-bar" aria-hidden="true"><i style="width:${Math.min(h/10*100,100)}%"></i></div>
+        <div class="step"><button type="button" data-step="${d}" data-dir="-1" aria-label="One less half hour on ${n}"${h <= 0 ? ' disabled' : ''}>−</button><output>${fmt(h)}h</output><button type="button" data-step="${d}" data-dir="1" aria-label="One more half hour on ${n}"${h >= 12 ? ' disabled' : ''}>+</button></div></div>`; }).join('');
+    document.querySelectorAll('[data-avrows]').forEach(e => e.innerHTML = rows);
+    const sorted = avail.off.slice().sort((a,b) => a.d < b.d ? -1 : 1);
+    const list = sorted.length ? sorted.map(o => {
+      const t = Date.parse(o.d + 'T00:00:00Z'), wd = (new Date(t).getUTCDay() + 6) % 7;
+      const label = new Date(t).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', timeZone:'UTC'});
+      return `<li><div>${esc(label)}<span class="n">${esc(o.note || 'No reason added')}</span></div><span class="x">−${fmt(avail.hrs[wd])}h</span><button class="btn sm" type="button" data-off-rm="${esc(o.d)}">Remove</button></li>`;
+    }).join('') : '<li><span class="n">No dates marked yet.</span></li>';
+    document.querySelectorAll('[data-offlist]').forEach(e => e.innerHTML = list);
+    document.querySelectorAll('.av-def').forEach(e => e.textContent = isDefaultAvail() ? 'Using the default hours.' : 'You changed the default hours.');
+    document.querySelectorAll('[data-av-reset]').forEach(b => b.disabled = isDefaultAvail());
+  }
+  function availChanged(){
+    state.avail = cloneAvail(avail); writeStore(); renderAvail(); renderNumbers();
+  }
+  document.addEventListener('click', e => {
+    const st = e.target.closest('[data-step]');
+    if (st){ const d = +st.dataset.step; avail.hrs[d] = Math.min(12, Math.max(0, avail.hrs[d] + 0.5 * +st.dataset.dir)); availChanged(); return; }
+    const rm = e.target.closest('[data-off-rm]');
+    if (rm){ avail.off = avail.off.filter(o => o.d !== rm.dataset.offRm); availChanged(); return; }
+    if (e.target.closest('[data-av-reset]')){ avail = cloneAvail(AV_DEFAULT); availChanged(); return; }
+    const add = e.target.closest('[data-off-add]');
+    if (add){
+      const box = add.closest('.off-add'), inp = box.querySelector('input[type="date"]'), note = box.querySelector('input[type="text"]');
+      const msg = box.parentElement.querySelector('.av-msg'), v = inp.value;
+      if (!v){ msg.textContent = 'Pick a date first.'; return; }
+      if (v < '2026-11-02' || v > '2026-12-20'){ msg.textContent = 'Pick a date between Nov 2 and Dec 20, the weeks this forecast covers.'; return; }
+      if (avail.off.some(o => o.d === v)){ msg.textContent = 'That date is already marked.'; return; }
+      avail.off.push({d:v, note:note.value.trim().slice(0,60)}); inp.value = ''; note.value = ''; msg.textContent = '';
+      availChanged();
+    }
+  });
+  function showDesk(v){
+    $('dToday').hidden = v !== 'today'; $('dAvail').hidden = v !== 'avail';
+    document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('on', a.dataset.nav === v));
+  }
+  function showMob(v){
+    $('mToday').hidden = v !== 'today'; $('mAvail').hidden = v !== 'avail';
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.mtab === v));
+    document.querySelector('.m-scroll').scrollTop = 0;
+  }
+  document.querySelectorAll('[data-nav]').forEach(a => a.addEventListener('click', () => showDesk(a.dataset.nav)));
+  document.querySelectorAll('[data-mtab]').forEach(t => t.addEventListener('click', () => showMob(t.dataset.mtab)));
+  const goTo = el => el && el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+  document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', () => {
+    showDesk('today'); document.querySelectorAll('.nav a').forEach(n => n.classList.toggle('on', n === a)); goTo($(a.dataset.go));
+  }));
+  document.querySelectorAll('[data-mgo]').forEach(t => t.addEventListener('click', () => {
+    showMob('today'); document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t)); goTo($(t.dataset.mgo));
+  }));
+
+  /* ---------- Editing ---------- */
+  const original = {};
+  function keyAll(){
+    let i = 0;
+    document.querySelectorAll('[data-e]').forEach(el => { if (!el.dataset.key) el.dataset.key = 's' + (i++); });
+    document.querySelectorAll('[data-e]').forEach(el => { const k = el.dataset.key; if (!(k in original)) original[k] = el.textContent; });
+  }
+  function restoreText(){ document.querySelectorAll('[data-e]').forEach(el => { const k = el.dataset.key; if (k in state.text) el.textContent = state.text[k]; }); }
+  let editing = false;
+  const EDITABLE = '[data-e],[data-hours]';
+  function setEditable(on){
+    document.querySelectorAll(EDITABLE).forEach(el => {
+      if (on){ el.contentEditable = 'plaintext-only'; if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true'; el.spellcheck = false; }
+      else el.contentEditable = 'false';
+    });
+  }
+  function setEditing(on){
+    editing = on; document.body.classList.toggle('editing', on);
+    $('editBtn').setAttribute('aria-pressed', String(on));
+    $('editBtn').textContent = on ? 'Done editing' : 'Edit text';
+    setEditable(on);
+  }
+  const num = el => parseFloat(el.textContent.replace(',','.'));
+  document.addEventListener('input', e => {
+    const el = e.target.closest && e.target.closest(EDITABLE);
+    if (!el) return;
+    if (el.hasAttribute('data-hours')){
+      const v = num(el);
+      if (!isNaN(v) && v >= 0 && v < 500){
+        const t = tasks.find(t => t.id === el.dataset.hours); t.hours = v; state.hours[t.id] = v;
+        document.querySelectorAll(`[data-hours="${t.id}"]`).forEach(o => { if (o !== el) o.textContent = fmt(v); });
+        renderNumbers(); writeStore();
+      }
+      return;
+    }
+    const k = el.dataset.key; state.text[k] = el.textContent;
+    document.querySelectorAll(`[data-key="${k}"]`).forEach(o => { if (o !== el) o.textContent = el.textContent; });
+    writeStore();
+  });
+  document.addEventListener('keydown', e => {
+    if (!editing || e.key !== 'Enter' || e.shiftKey) return;
+    const el = e.target.closest && e.target.closest(EDITABLE);
+    if (el && el.tagName !== 'PRE'){ e.preventDefault(); el.blur(); }
+  });
+  document.addEventListener('click', e => { if (e.target.closest('.app a, .app button, .phone a')) e.preventDefault(); });
+  document.addEventListener('focusout', e => {
+    if (!(e.target.matches && e.target.matches('[data-hours]'))) return;
+    document.querySelectorAll('[data-hours]').forEach(o => { o.textContent = fmt(tasks.find(t => t.id === o.dataset.hours).hours); });
+    renderNumbers();
+  });
+
+  $('editBtn').addEventListener('click', () => setEditing(!editing));
+  $('storyBtn').addEventListener('click', () => {
+    const on = !document.body.classList.contains('stories');
+    document.body.classList.toggle('stories', on);
+    $('storyBtn').setAttribute('aria-pressed', String(on));
+    $('storyBtn').textContent = on ? 'Hide user stories' : 'Show user stories';
+  });
+  $('resetBtn').addEventListener('click', () => {
+    state = {text:{}, hours:{}, avail:null}; writeStore();
+    tasks = TASKS_DEFAULT.map(t => Object.assign({}, t)); avail = cloneAvail(AV_DEFAULT);
+    renderStatic(); renderAvail();
+    document.querySelectorAll('[data-e]').forEach(el => { const k = el.dataset.key; if (k in original) el.textContent = original[k]; });
+    keyAll(); renderNumbers(); setEditable(editing);
+  });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    $('stage').dataset.view = b.dataset.view;
+    document.querySelectorAll('.seg button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+  }));
+
+  /* ---------- Boot ---------- */
+  renderStatic(); renderAvail(); keyAll(); restoreText(); renderNumbers();
+})();
+</script>
+</body>
+</html>
