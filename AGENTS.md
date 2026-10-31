@@ -102,13 +102,21 @@ Key patterns:
 
 ### Testing strategy
 
-<!-- Why: P2 grades TDD visible in git history and 80%+ coverage. -->
+<!-- Why: P2 grades TDD visible in git history and 80%+ coverage.
+     v3: in the HW3 test, every test passed but marked dates were never saved,
+     because the component test swapped our own save code for a mock. -->
 
 - **TDD, red-green-refactor.** For every feature: write a failing test, commit
   it (`test: ...`), then write the code to make it pass (`feat: ...`), then
   refactor. The failing-test commit must come **before** the implementation
   commit in history.
-- **Each acceptance criterion in the GitHub issue gets at least one test.**
+- **Each acceptance criterion in the GitHub issue gets at least one test that
+  runs the real path a user takes**: the component's own save action, the
+  route handler, and the database. A criterion isn't covered if the test
+  replaces our own code on that path with a mock.
+- **Don't add props or options only so a test can swap out behavior** (for
+  example an `onSave` prop the page never passes). Mock `fetch` or the
+  external service instead, so the real code runs.
 - **Unit tests** (Vitest): every function in `src/lib/planner/` and
   `src/lib/canvas/`, including edge cases (no assignments, past due dates,
   zero available hours, assignments that can't fit).
@@ -119,8 +127,15 @@ Key patterns:
   mocked with fixtures.
 - **E2E tests** (Playwright, planned): main user flows against demo mode.
 - **Coverage goal: 80%+** of `src/lib` and `src/app/api`.
-- Before saying a task is done, run and pass: `npm test`, `npm run lint`,
-  `npm run typecheck`.
+- **Done check.** Before saying a task is done:
+  1. Run and pass `npm test`, `npm run lint`, `npm run typecheck`, and
+     `npm run build` (the build catches `cacheComponents` mistakes the dev
+     server doesn't).
+  2. Start the app (`npm run dev`) and try every acceptance criterion in the
+     browser. For anything that saves, reload the page and check the change is
+     still there.
+  3. In your final message, list each acceptance criterion with how you checked
+     it, and say plainly which ones you couldn't check.
 
 ---
 
@@ -240,6 +255,7 @@ Sprint 1 and Sprint 2 milestones.
 2. Work only on that issue. Don't refactor or reformat unrelated files.
 3. Write failing tests for the acceptance criteria, then implement (see Testing strategy).
 4. If an acceptance criterion is unclear or impossible, stop and ask instead of guessing.
+5. Finish with the done check (see Testing strategy) before opening a PR.
 
 ### Branch naming
 `<type>/<issue-number>-<short-description>`, lowercase, words joined by hyphens.
@@ -371,3 +387,4 @@ Move the issue's card as work progresses:
 |---|---|---|---|
 | v1 (part A) | 2026-10-29 | Project context, architecture, naming, testing strategy, Scrum workflow | Initial rules for Sprint 1 |
 | v2 (part B) | 2026-10-31 | PRD and design references, mockup rules, screens and flows, do's and don'ts, security, accessibility | Give the AI the product spec and the rules for using the mockup |
+| v3 (part A) | 2026-10-30 | Acceptance-criterion tests must run the real user path; no test-only props; done check adds `npm run build`, trying each criterion in the browser with a reload, and reporting how each was checked | HW3 with-rules run: all 36 tests passed, but marked dates were never saved because the component test mocked our own `onSave` |
