@@ -31,4 +31,4 @@ URL it prints into `.env`.
 ## Mockup
 
 An interactive desktop and mobile mockup of Loadline is in
-[`docs/mockup/index.html`](docs/mockup/index.html). Open it in a browser.
+[`docs/mockups/loadline-mockup.html`](docs/mockups/loadline-mockup.html). Open it in a browser.
