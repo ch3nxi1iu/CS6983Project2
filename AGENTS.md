@@ -126,10 +126,104 @@ Key patterns:
 
 ## 2. PRD and design references
 
-<!-- Part B (@brandy-wang): link docs/PRD.md, describe the mockups, key UI
-     components and their behavior, user flows the AI should follow. -->
+<!-- Why: tell the AI what to build and which document wins when sources disagree. -->
 
-_To be written in part B._
+### Where the requirements live
+
+| Source | What it holds |
+|---|---|
+| [`docs/PRD.md`](docs/PRD.md) | Problem, target users, the six proposal stories, user stories US-01 to US-15, sprint timeline (added in #3) |
+| GitHub issues #7–#21 | One issue per user story, each with its acceptance criteria |
+| [`docs/mockups/loadline-mockup.html`](docs/mockups/loadline-mockup.html) | Interactive desktop and mobile mockup (added in #3); open it in a browser |
+| `docs/mockups/*.png` | Screenshots of the dashboard, availability settings, and plan view |
+
+Order of authority: **issue acceptance criteria → PRD → mockup.** If the PRD
+isn't in `docs/` yet, use the issue. Where the issue and PRD are silent, the
+mockup's behavior is the intended design. If they still don't answer the
+question, ask.
+
+### User stories at a glance
+
+| Proposal story | User stories (issue) | Sprint |
+|---|---|---|
+| 1. Canvas deadlines in one place | US-01 login (#7), US-02 connect Canvas (#8), US-03 sync (#9), US-04 demo mode (#10), US-14 custom tasks (#20) | 1, 2 |
+| 2. Crunch-week forecast | US-05 forecast (#11), US-06 availability (#12) | 1 |
+| 3. Work plan that adapts | US-07 generate plan (#13), US-08 done / missed and re-plan (#14), US-13 learn my pace (#19) | 1, 2 |
+| 4. Today's top three | US-09 top 3 (#15), US-15 AI step suggestions, stretch (#21) | 2 |
+| 5. Live group progress | US-10 groups and invites (#16), US-11 live board (#17) | 2 |
+| 6. Developer API | US-12 public API with OpenAPI docs (#18) | 2 |
+
+The mockup labels its badges "Story 1" to "Story 6" by **proposal story**
+(its "Story 6" is the developer API), and "US-06" by user story. Its wording
+of US-06 differs from the issue; the issue's wording is the one to test.
+
+### Using the mockup (docs/mockups/loadline-mockup.html)
+
+The mockup shows the intended layout and behavior. It is not production code.
+Follow its screens and flows, but don't copy its implementation.
+
+#### Data and persistence
+- The mockup keeps its edits in the browser's local storage. That is only there
+  so the standalone HTML file works on its own.
+- Do not use local storage, session storage, or any other browser-only storage
+  for real data. All real data (availability hours, unavailable dates, tasks,
+  plans) is saved in the Postgres database through the backend.
+- Everything in the mockup's sample data is illustrative: course names,
+  teammates, assignments, dates, hours of work, and the seven-week window
+  (Nov 2 to Dec 20, 2026). Don't hard-code any of it.
+
+#### Availability (US-06): details that exist only in the mockup
+These are intended behavior, not sample data. Implement them:
+- Each day's study hours are limited to 0–12 hours.
+- Hours change in 0.5-hour steps.
+- Default hours: 3h Monday to Thursday, 2h Friday, 4h Saturday and Sunday
+  (22h a week).
+- A date marked unavailable has no study hours that day. A week's available
+  hours are the sum of its daily hours minus any unavailable days.
+- Any change to hours or unavailable dates recalculates the plan and forecast.
+- Not planned: calendar sync. Study hours come only from what the user sets.
+  Don't add calendar integration or imply it in the UI.
+
+### Screens
+
+Desktop has a left sidebar (Today, Forecast, Work plan, Deadlines, Group
+projects, Developer API, Settings, plus the user's Canvas courses and sync
+status). Mobile has a bottom tab bar (Today, Forecast, Plan, Team, Settings).
+Every screen must work at both sizes.
+
+| Screen | Key components and behavior | Story |
+|---|---|---|
+| Today (dashboard) | Top three cards with rank, title, course, time and a one-line reason; links to the full plan | US-09 |
+| | Week stats: work planned, study hours, difference, crunch weeks ahead | US-05 |
+| Forecast | Stacked bars of hours per week by course, a dashed line for study hours, crunch weeks marked in red with a label (not color alone); clicking a week lists its assignments | US-05, US-06 |
+| Deadlines | One list from Canvas sorted by due date, course color swatch, hours estimate, plan status, "new" tag on newly synced items, done items struck through | US-03 |
+| Work plan | Seven-day grid of sessions with time, task and course; done, missed (dashed) and scheduled states; "due" and "moved" tags; a banner after a missed session with Undo and Pick other times | US-07, US-08 |
+| Group project | Members with role, progress bar and percent, a live indicator, and an activity feed that highlights blockers | US-10, US-11 |
+| Developer API | Token shown masked with Copy and New token, endpoint list, example request and response, links to the API reference and OpenAPI spec | US-12 |
+| Settings → Availability | Per-day steppers, unavailable dates with optional reason, live effect on the week and forecast | US-06 |
+
+### Main user flows
+1. **First visit:** landing page → sign up (or "Try the demo") → connect Canvas
+   → first sync → set availability (prefilled defaults) → plan and forecast
+   appear on Today.
+2. **Daily use:** open Today → work through the top three → mark sessions done
+   or missed → the plan re-plans and Today updates.
+3. **Plan ahead:** Forecast → spot a crunch week → open it to see the
+   assignments → change availability or estimates → forecast redraws.
+4. **Group work:** create a group → share the invite link → teammates join →
+   add shared tasks → everyone sees status changes live.
+
+### Where the mockup and the issues differ (follow the issue)
+- **Top three ranking:** the mockup says "deadline, hours left and what it
+  unblocks"; #15 ranks by grade weight, points and days until due.
+- **Forecast window:** the mockup shows 7 weeks; #11 defaults to 4, configurable.
+- **Sync:** the mockup says "every 30 minutes"; #9 syncs on login and from
+  "Sync now".
+- **API paths:** the mockup shows `/v1/...` on `api.loadline.app`; real routes
+  follow the architecture above (`/api/<resource>`). The mockup's token is the
+  revocable personal API key from #18.
+- **"Move 8h earlier" button** on the forecast advice isn't in any issue.
+  Don't build it unless an issue asks for it.
 
 ---
 
@@ -191,10 +285,81 @@ Move the issue's card as work progresses:
 
 ## 4. Do's and don'ts
 
-<!-- Part B (@brandy-wang): patterns to follow and avoid, preferred
-     dependencies and libraries, security and accessibility requirements. -->
+<!-- Why: list the mistakes we want the AI to avoid before it makes them. -->
 
-_To be written in part B._
+### Patterns to follow
+- **Do** keep planner, forecast and ranking code pure and pass in "now",
+  availability and assignments as arguments (see Architecture).
+- **Do** validate every request body and Canvas response at the boundary:
+  parse `unknown` into a typed value, and return a `VALIDATION_ERROR` on bad
+  input.
+- **Do** check ownership on every query: filter by the signed-in user's id, so
+  one user can never read or change another user's rows.
+- **Do** handle the empty, loading and error states of every screen (no Canvas
+  connected, no assignments, sync failed, nothing left today).
+- **Do** recalculate the plan and forecast on the server after anything they
+  depend on changes (sync, availability, estimates, session done or missed).
+- **Do** use Tailwind utility classes. Define colors once as theme tokens in
+  `globals.css` (`@theme`), with dark-mode values, and use those tokens instead
+  of raw hex values, so light and dark mode stay consistent.
+
+### Patterns to avoid
+- **Don't** put business logic in React components or route handlers.
+- **Don't** fetch from the client what a Server Component can load on the server.
+- **Don't** call the real Canvas API in tests, demo mode or seed scripts.
+- **Don't** store real data in `localStorage`, `sessionStorage` or cookies
+  (other than the auth cookie).
+- **Don't** hard-code the mockup's sample data, dates or week window.
+- **Don't** add features, settings or buttons that no issue asks for.
+- **Don't** disable lint rules, use `@ts-ignore`, or skip or delete failing
+  tests to make a check pass. Fix the cause or ask.
+
+### Dependencies
+- Use what's already installed: Next.js, React, Tailwind, Prisma with the `pg`
+  adapter, Vitest and Testing Library. Playwright comes with #6.
+- **Ask before adding any new dependency**, and say why it's needed. When a
+  partner approves one, add it to the stack table above.
+- No UI component kits, CSS-in-JS, global state libraries, or alternative ORMs.
+- Use the platform first: `fetch`, `Intl` for date and time display, the
+  Web Crypto or Node `crypto` module for tokens and encryption.
+- Never write your own password hashing or crypto; use a well-known library
+  approved by a partner.
+
+### Security
+- **Passwords** are hashed with a slow, salted algorithm; never stored or
+  logged in plain text (#7).
+- **JWT** lives in an httpOnly, `Secure`, `SameSite=Lax` cookie. Never put it in
+  local storage or return it in a response body (#7).
+- **Canvas tokens and calendar feed URLs** are encrypted at rest, never
+  returned by any API, never logged, and deleted on disconnect (#8).
+- **Authorization is enforced in the API**, not just hidden in the UI. Group
+  members never see each other's private Canvas data, and nothing is shared to
+  a group unless the member chooses to share it (#16, #17).
+- **API keys** are shown once, stored hashed, revocable, and rate-limited (#18).
+- **Secrets** come from environment variables and are listed in `.env.example`
+  without real values. Never commit `.env`.
+- **AI step suggestions** send an assignment description to an AI provider only
+  when the user clicks, say so in the UI, and never generate solution content
+  (#21).
+- Errors shown to users never reveal stack traces, tokens, or which login
+  field was wrong.
+
+### Accessibility
+- Target **WCAG 2.2 AA**.
+- Use semantic HTML: real `<button>`, `<a>`, `<label>` and headings in order.
+  Every input has a visible label or an `aria-label`.
+- Everything works with the keyboard alone, with a visible focus outline.
+- **Never use color alone** to show meaning. Crunch weeks, at-risk work, missed
+  and moved sessions also get a text label, tag or pattern (as the mockup does).
+- Text and controls meet AA contrast in both light and dark mode.
+- Charts have a text alternative (an `aria-label` summary or a table of the
+  same numbers).
+- Changes that happen without a page load (re-plan results, live group
+  updates, sync status) are announced with `aria-live` or `role="status"`.
+- Respect `prefers-reduced-motion` for animations such as the live indicator.
+- Layouts work from 360px wide up, with touch targets at least 24×24px.
+- Component tests query by role and label (see Testing strategy), which also
+  checks that elements are accessible.
 
 ---
 
@@ -205,3 +370,4 @@ _To be written in part B._
 | Version | Date | Change | Why |
 |---|---|---|---|
 | v1 (part A) | 2026-10-29 | Project context, architecture, naming, testing strategy, Scrum workflow | Initial rules for Sprint 1 |
+| v2 (part B) | 2026-10-31 | PRD and design references, mockup rules, screens and flows, do's and don'ts, security, accessibility | Give the AI the product spec and the rules for using the mockup |
