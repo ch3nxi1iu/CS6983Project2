@@ -2,7 +2,7 @@
 
 A Canvas-connected planner that helps students see crunch weeks early and spread
 their work out. Each detailed story below is one GitHub issue, and the
-interactive mockup is in [`docs/mockup/index.html`](mockup/index.html).
+interactive mockup is in [`docs/mockups/loadline-mockup.html`](mockups/loadline-mockup.html).
 
 > **AI usage:** first draft generated with Claude Code on 2026-10-23 from our
 > brainstorming; both partners review and edit it. Sprint and priority are
@@ -316,4 +316,4 @@ crunch week, not whether they'd use the app:
 ## Open questions
 - **Can Northeastern students create Canvas access tokens?** Check Canvas → Account → Settings → "+ New Access Token". If not, only the calendar feed works, and it has **no** submission status, points, or assignment-group weights, which weakens US-03, US-05, and US-09.
 - Default hour estimates per assignment type, session length, and buffer: decide together.
-- Product name: **Loadline** is the working name in the mockup (`docs/mockup/index.html`). Confirm together.
+- Product name: **Loadline** is the working name in the mockup (`docs/mockups/loadline-mockup.html`). Confirm together.
