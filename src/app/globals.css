@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+/* Design tokens from the mockup (AGENTS.md, section 4). Use them through
+   utilities such as bg-paper, text-ink-2 and border-rule. */
+@theme {
+  --color-paper: #ebefee;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f7f6;
+  --color-ink: #17283a;
+  --color-ink-2: #506070;
+  --color-ink-3: #7d8a96;
+  --color-rule: #d3dcdb;
+  --color-line: #c2362e;
+  --color-line-soft: #f7e3e1;
+  --color-ok: #3f7a3a;
+  --color-edit: #5458a8;
+  --color-c1: #2c7a80;
+  --color-c2: #b4861a;
+  --color-c3: #5458a8;
+  --color-c4: #62813c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #0e1822;
+    --color-surface: #15222e;
+    --color-surface-2: #1b2a37;
+    --color-ink: #e5ecef;
+    --color-ink-2: #a2b2be;
+    --color-ink-3: #7a8b98;
+    --color-rule: #2a3b49;
+    --color-line: #f06a5f;
+    --color-line-soft: #3a2224;
+    --color-ok: #8bc47f;
+    --color-edit: #9aa0f0;
+    --color-c1: #5fb4b9;
+    --color-c2: #e2b84f;
+    --color-c3: #9196e8;
+    --color-c4: #9cc06e;
+  }
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
