@@ -11,3 +11,99 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// All times are stored in UTC and all durations in hours (see AGENTS.md).
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  passwordHash     String
+  name             String?
+  // Demo accounts are seeded with sample data and can be reset (#10).
+  isDemo           Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  availability     Availability?
+  unavailableDates UnavailableDate[]
+  courses          Course[]
+  workSessions     WorkSession[]
+}
+
+// Study hours the user has for each weekday (#12). Defaults match the mockup:
+// 3h Monday to Thursday, 2h Friday, 4h on weekends (22h a week).
+model Availability {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monday    Float    @default(3)
+  tuesday   Float    @default(3)
+  wednesday Float    @default(3)
+  thursday  Float    @default(3)
+  friday    Float    @default(2)
+  saturday  Float    @default(4)
+  sunday    Float    @default(4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A specific day with no study time, e.g. travel or an interview (#12).
+model UnavailableDate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code        String
+  name        String
+  createdAt   DateTime     @default(now())
+  assignments Assignment[]
+
+  @@unique([userId, code])
+}
+
+model Assignment {
+  id             String        @id @default(cuid())
+  courseId       String
+  course         Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title          String
+  dueAt          DateTime
+  points         Float?
+  estimatedHours Float
+  submitted      Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  workSessions   WorkSession[]
+
+  @@index([courseId, dueAt])
+}
+
+enum WorkSessionStatus {
+  SCHEDULED
+  DONE
+  MISSED
+}
+
+// One block of planned work on an assignment (#13).
+model WorkSession {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignmentId String
+  assignment   Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  startAt      DateTime
+  hours        Float
+  status       WorkSessionStatus @default(SCHEDULED)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([userId, startAt])
+}
