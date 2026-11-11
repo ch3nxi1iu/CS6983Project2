@@ -1,0 +1,100 @@
+# Runs on every pull request and on pushes to main. Stages run in order:
+# lint and typecheck → unit and integration tests → build.
+# E2E tests (#6) will be added as a stage after build.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test:
+    name: Unit and integration tests
+    needs: lint
+    runs-on: ubuntu-latest
+    # A throwaway Postgres for integration tests, separate from dev and production.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: loadline_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loadline_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+      - run: npm test
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      # The build doesn't connect, but the Prisma client expects a URL to be set.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/unused
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # Fails on high or critical vulnerabilities in installed packages.
+      - run: npm audit --audit-level=high
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Blocks PRs that add a dependency with a known high or critical vulnerability.
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
