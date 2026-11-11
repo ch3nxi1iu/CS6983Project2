@@ -250,8 +250,19 @@ Work is tracked on the GitHub board
 ([CS6983 Project 2](https://github.com/users/ch3nxi1iu/projects/1)), with
 Sprint 1 and Sprint 2 milestones.
 
+### Issue titles
+- **User stories:** `US-<nn>: <action-oriented title>`, where `US-<nn>` is the
+  story's ID in `docs/PRD.md`. Example: `US-06: Set weekly availability` (#12).
+- **Chores and docs:** an action-oriented title with no prefix, e.g.
+  `Set up CI with lint, tests on every PR, and security scanning` (#4).
+- The two numbers mean different things: `US-06` is the story in the PRD, `#12`
+  is the GitHub issue. Branches and commits use the issue number; the story ID
+  stays in the title.
+- A new story goes into `docs/PRD.md` first with the next free `US-<nn>`, then
+  gets an issue with that ID in its title.
+
 ### When asked to implement an issue
-1. Read the issue first (`gh issue view <number>`, or ask for it to be pasted), especially its acceptance criteria.
+1. Read the issue first (`gh issue view <number>`, or ask for it to be pasted), especially its acceptance criteria. If you're given a story ID like `US-06`, find its issue in "User stories at a glance" (section 2).
 2. Work only on that issue. Don't refactor or reformat unrelated files.
 3. Write failing tests for the acceptance criteria, then implement (see Testing strategy).
 4. If an acceptance criterion is unclear or impossible, stop and ask instead of guessing.
@@ -278,7 +289,7 @@ Examples:
 
 ### Pull requests
 - One PR per issue, opened from its branch into `main`. Never push to `main` directly.
-- PR title: the issue title. PR body includes:
+- PR title: the issue title, including its story ID (`US-06: Set weekly availability`). PR body includes:
   - `Closes #<issue>`, which closes the issue and moves its card to Done on merge
   - what changed and how to test it
   - screenshots for UI changes
@@ -413,3 +424,4 @@ Move the issue's card as work progresses:
 | v1 (part A) | 2026-10-29 | Project context, architecture, naming, testing strategy, Scrum workflow | Initial rules for Sprint 1 |
 | v2 (part B) | 2026-10-31 | PRD and design references, mockup rules, screens and flows, do's and don'ts, security, accessibility | Give the AI the product spec and the rules for using the mockup |
 | v3 | 2026-10-30 | Part A: acceptance-criterion tests must run the real user path; no test-only props; done check adds `npm run build`, trying each criterion in the browser with a reload, and reporting how each was checked. Part B: the mockup's color tokens (light and dark) and font, with exact values, and a ban on Tailwind's default palette | HW3 with-rules run: all 36 tests passed, but marked dates were never saved because the component test mocked our own `onSave`; and the agent skipped "define colors as tokens" and used Tailwind blue/gray |
+| v4 | 2026-11-10 | Issue titles: user stories start with their PRD story ID (`US-06: ...`), chores and docs have no prefix; PR titles follow the issue title; a story ID in a request maps to its issue through section 2 | Make every board card show which PRD story it is, so it's clear what each issue delivers |
