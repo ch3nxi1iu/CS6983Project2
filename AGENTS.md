@@ -294,7 +294,8 @@ Examples:
   - what changed and how to test it
   - screenshots for UI changes
   - **AI usage**: which tool was used and what it generated
-- CI must pass (once #4 is set up).
+- CI must pass: lint and typecheck, unit and integration tests, build, dependency
+  audit, and CodeQL code scanning (`.github/workflows/`).
 - **The other partner reviews and approves before merge.** Nobody merges their own PR.
 - Merge with **"Create a merge commit"**, not squash, so the test-first commits
   stay visible in history. Delete the branch after merging.
@@ -425,3 +426,4 @@ Move the issue's card as work progresses:
 | v2 (part B) | 2026-10-31 | PRD and design references, mockup rules, screens and flows, do's and don'ts, security, accessibility | Give the AI the product spec and the rules for using the mockup |
 | v3 | 2026-10-30 | Part A: acceptance-criterion tests must run the real user path; no test-only props; done check adds `npm run build`, trying each criterion in the browser with a reload, and reporting how each was checked. Part B: the mockup's color tokens (light and dark) and font, with exact values, and a ban on Tailwind's default palette | HW3 with-rules run: all 36 tests passed, but marked dates were never saved because the component test mocked our own `onSave`; and the agent skipped "define colors as tokens" and used Tailwind blue/gray |
 | v4 | 2026-11-10 | Issue titles: user stories start with their PRD story ID (`US-06: ...`), chores and docs have no prefix; PR titles follow the issue title; a story ID in a request maps to its issue through section 2 | Make every board card show which PRD story it is, so it's clear what each issue delivers |
+| v5 | 2026-11-10 | PR rule now names the CI checks that must pass | CI exists (#4) |
