@@ -86,15 +86,6 @@ jobs:
         with:
           node-version: 24
       # Fails on high or critical vulnerabilities in installed packages.
+      # (GitHub's dependency-review action would also work here, but it needs
+      # the repo's Dependency graph setting turned on.)
       - run: npm audit --audit-level=high
-
-  dependency-review:
-    name: Dependency review
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # Blocks PRs that add a dependency with a known high or critical vulnerability.
-      - uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: high
