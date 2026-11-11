@@ -10,5 +10,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
+    // Database tests share one database, and the local `prisma dev` server
+    // mixes up queries from parallel connections, so run files one at a time.
+    fileParallelism: false,
   },
 });
