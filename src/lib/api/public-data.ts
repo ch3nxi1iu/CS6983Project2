@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 import { getWorkPlanForUser, type PlanSessionView } from "@/lib/work-plan";
 import type { AssignmentKind } from "@/lib/planner/work-plan";
 import { toDateKey } from "@/lib/planner/availability";
-import type { Result } from "@/lib/planner/availability";
 
 export type OpenTaskView = {
   id: string;
@@ -45,10 +44,14 @@ export async function getOpenTasksForUser(userId: string): Promise<OpenTaskView[
  * Fails with AVAILABILITY_NOT_SET until the user has saved study hours, the
  * same as /api/plan.
  */
+export type TodaySessionsResult =
+  | { ok: true; value: { date: string; sessions: PlanSessionView[] } }
+  | { ok: false; error: { code: "AVAILABILITY_NOT_SET"; message: string } };
+
 export async function getTodaySessionsForUser(
   userId: string,
   now: Date,
-): Promise<Result<{ date: string; sessions: PlanSessionView[] }>> {
+): Promise<TodaySessionsResult> {
   const plan = await getWorkPlanForUser(userId, now);
   if (!plan.ok) {
     return { ok: false, error: { code: "AVAILABILITY_NOT_SET", message: plan.message } };

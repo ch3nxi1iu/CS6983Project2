@@ -18,9 +18,9 @@ describe("/docs/api", () => {
   test("has a Public API heading and a paragraph that explains the Bearer header", () => {
     render(<DocsApiPage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Public API" })).toBeInTheDocument();
-    expect(screen.getByText(/Authorization: Bearer/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "API keys" })).toHaveAttribute("href", "/settings/api");
+    screen.getByRole("heading", { level: 1, name: "Public API" });
+    screen.getByText(/Authorization: Bearer/);
+    expect(screen.getByRole("link", { name: "API keys" }).getAttribute("href")).toBe("/settings/api");
   });
 
   test("loads the pinned Swagger UI stylesheet and bundle from the CDN", async () => {

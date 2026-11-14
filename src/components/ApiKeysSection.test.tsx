@@ -95,10 +95,10 @@ describe("/settings/api keys list", () => {
 
     const list = screen.getByRole("list", { name: "Your API keys" });
     const item = within(list).getByText("Grade script").closest("li") as HTMLElement;
-    expect(within(item).getByText(key.slice(0, 11))).toBeInTheDocument();
-    expect(within(item).getByText(/Created/)).toBeInTheDocument();
-    expect(within(item).getByText(/Last used: Never/)).toBeInTheDocument();
-    expect(within(item).getByRole("button", { name: "Revoke Grade script" })).toBeInTheDocument();
+    within(item).getByText(key.slice(0, 11));
+    within(item).getByText(/Created/);
+    within(item).getByText(/Last used: Never/);
+    within(item).getByRole("button", { name: "Revoke Grade script" });
   });
 
   test("never shows a full key in the list", async () => {
@@ -113,15 +113,14 @@ describe("/settings/api keys list", () => {
     await signIn();
     await renderKeys();
 
-    expect(screen.getByText("You have no active API keys.")).toBeInTheDocument();
+    screen.getByText("You have no active API keys.");
   });
 
   test("links to the API documentation", async () => {
     await signIn();
     await renderKeys();
 
-    expect(screen.getByRole("link", { name: "API documentation" })).toHaveAttribute(
-      "href",
+    expect(screen.getByRole("link", { name: "API documentation" }).getAttribute("href")).toBe(
       "/docs/api",
     );
   });
@@ -137,7 +136,7 @@ describe("creating a key", () => {
 
     const shown = await screen.findByText(/^ll_[A-Za-z0-9_-]{43}$/);
     const key = shown.textContent ?? "";
-    expect(screen.getByText(/will not be shown again/i)).toBeInTheDocument();
+    screen.getByText(/will not be shown again/i);
     expect(fetch).toHaveBeenCalledWith("/api/api-keys", expect.objectContaining({ method: "POST" }));
     expect(refreshMock).toHaveBeenCalled();
 
@@ -172,7 +171,7 @@ describe("revoking a key", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Revoke Old script" }));
 
-    expect(await screen.findByText("Key revoked.")).toBeInTheDocument();
+    await screen.findByText("Key revoked.");
     expect(refreshMock).toHaveBeenCalled();
     const row = await prisma.apiKey.findUniqueOrThrow({ where: { id: apiKey.id } });
     expect(row.revokedAt).not.toBeNull();
