@@ -1,10 +1,11 @@
 // @vitest-environment node
 import "dotenv/config";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { POST as registerHandler } from "@/app/api/auth/register/route";
 import { POST as loginHandler } from "@/app/api/auth/login/route";
 import { POST as logoutHandler } from "@/app/api/auth/logout/route";
+import * as passwordModule from "@/lib/auth/password";
 import { verifyPassword } from "@/lib/auth/password";
 import { verifySessionToken } from "@/lib/auth/jwt";
 
@@ -72,6 +73,61 @@ describe("POST /api/auth/register", () => {
 
     const data = await res.json();
     expect(data.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("rejects email exceeding 254 characters", async () => {
+    const longEmail = `${"a".repeat(245)}@example.com`; // 257 characters
+    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
+      email: longEmail,
+      password: "ValidPassword123!",
+    });
+
+    const res = await registerHandler(req);
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("rejects polynomial ReDoS malicious email patterns", async () => {
+    // Malicious crafted email with repetitive domain dots/chars
+    const maliciousEmail = `${"a".repeat(100)}@${"a.".repeat(50)}com`;
+    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
+      email: maliciousEmail,
+      password: "ValidPassword123!",
+    });
+
+    const res = await registerHandler(req);
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("rejects invalid email without valid top-level domain", async () => {
+    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
+      email: "user@domain",
+      password: "ValidPassword123!",
+    });
+
+    const res = await registerHandler(req);
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("accepts valid email with subdomains", async () => {
+    const email = `sub-${crypto.randomUUID()}@student.nyu.edu`;
+    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
+      email,
+      password: "ValidPassword123!",
+    });
+
+    const res = await registerHandler(req);
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    createdUserIds.push(data.user.id);
   });
 
   test("rejects duplicate email with 409 EMAIL_EXISTS", async () => {
@@ -170,6 +226,19 @@ describe("POST /api/auth/login", () => {
     const data = await res.json();
     expect(data.error.message).toBe("Email or password is incorrect.");
   });
+
+  test("still runs verifyPassword against dummy hash when email does not exist", async () => {
+    const spy = vi.spyOn(passwordModule, "verifyPassword");
+    const loginReq = createJsonRequest("http://localhost:3000/api/auth/login", {
+      email: `nonexistent-${crypto.randomUUID()}@example.com`,
+      password: "AnyPassword123!",
+    });
+    const res = await loginHandler(loginReq);
+    expect(res.status).toBe(401);
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
 });
 
 describe("POST /api/auth/logout", () => {
