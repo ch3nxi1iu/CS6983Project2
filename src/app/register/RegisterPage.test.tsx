@@ -1,11 +1,18 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+
+const pushMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 import RegisterPage from "@/app/register/page";
 
 const fetchMock = vi.fn();
 
 beforeEach(() => {
   fetchMock.mockReset();
+  pushMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
 });
 
@@ -84,6 +91,10 @@ describe("RegisterPage", () => {
           }),
         }),
       );
+    });
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith("/dashboard");
     });
   });
 });

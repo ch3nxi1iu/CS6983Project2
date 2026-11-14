@@ -2,8 +2,23 @@
 import "dotenv/config";
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
-import { createSession, getSession, requireUser, clearSession } from "@/lib/auth/session";
 import { verifySessionToken } from "@/lib/auth/jwt";
+
+const cookieJar = new Map<string, { value: string; [key: string]: unknown }>();
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name: string) => cookieJar.get(name),
+    set: (name: string, value: string, options?: unknown) => {
+      cookieJar.set(name, { value, ...(typeof options === "object" ? options : {}) });
+    },
+    delete: (name: string) => {
+      cookieJar.delete(name);
+    },
+  }),
+}));
+
+import { createSession, getSession, requireUser, clearSession } from "@/lib/auth/session";
 
 const createdUserIds: string[] = [];
 
@@ -18,8 +33,14 @@ async function createUser() {
   return user;
 }
 
+beforeEach(() => {
+  cookieJar.clear();
+});
+
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+  if (createdUserIds.length > 0) {
+    await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+  }
   await prisma.$disconnect();
 });
 
@@ -34,6 +55,10 @@ describe("session helpers", () => {
 
     const session = await getSession();
     expect(session?.userId).toBe(user.id);
+
+    const storedCookie = cookieJar.get("session");
+    expect(storedCookie?.httpOnly).toBe(true);
+    expect(storedCookie?.sameSite).toBe("lax");
   });
 
   test("clearSession removes the session cookie", async () => {
