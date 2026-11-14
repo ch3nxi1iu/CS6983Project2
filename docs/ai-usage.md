@@ -41,6 +41,7 @@ has loaded `AGENTS.md`.
 | #40 | #23 | Chenxi | Claude Code | Drew the diagrams from the schema and code | Review by Brandy pending |
 | (open) | #13 | Chenxi | Antigravity, Claude Code (Haiku subagent) | Antigravity: failing tests and the `kind` migration. Haiku: the planner and data functions, then (after login merged) failing tests for and the `/api/plan`, `/api/assignments/[id]` routes and `/plan` page, and two strengthened tests | Chose to switch tools when the quota ran out; Claude Code reviewed the code, reran all checks, and tried the plan in a browser with sample data |
 | (open) | #12 | Chenxi | Claude Code (Haiku subagent) | Failing tests, then `PUT`/`GET /api/availability`, `POST`/`DELETE /api/unavailable-dates` and the `/settings/availability` page wrapping Brandy's existing component | Asked for it when the settings screen turned out to be missing; Claude Code reviewed it, reran all checks, and tried saving hours and dates in a browser |
+| (open) | #18 | Chenxi | Claude Code (Haiku subagent) | Two test-first rounds: API keys (hashed, revocable), cookie-or-Bearer auth, rate limiting, four public endpoints; then the OpenAPI spec, the Swagger UI docs page, and the API keys page. Wrote the `ApiKey` migration with `prisma migrate diff` when `migrate dev` failed locally | Chose the pinned-CDN Swagger UI to avoid a new dependency; Claude Code reviewed the migration and auth code, reran all checks, and tried docs and key create/revoke in a browser |
 
 ## Prompts
 
