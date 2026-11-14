@@ -187,29 +187,28 @@ describe("generateWorkPlan", () => {
     }
   });
 
-  test("earliest deadline first when two assignments compete for the same days", () => {
-    // Both assignments due later, but different deadlines; earlier one should be scheduled first (later in time)
-    // a1 due Nov 25, a2 due Nov 24 — a2 should be scheduled on later days (closer to its due)
-    // and a1's sessions end up pushed earlier (farther from its due)
+  test("earliest deadline first: the earlier-due assignment gets all its hours before the later one", () => {
+    // Only Wed Nov 18 and Thu Nov 19 have study time (2h each). Every other day is
+    // unavailable, so the two assignments must compete for those two days.
+    // a2 is due Fri Nov 20 (earlier) and needs 4h. a1 is due Sat Nov 21 (later) and needs 4h.
+    // a1 is listed first, so the result depends on the deadline sort, not input order.
     const result = generateWorkPlan({
       assignments: [
-        a("a1", "2026-11-25", 4), // due later
-        a("a2", "2026-11-24", 4), // due earlier
+        a("a1", "2026-11-21", 4), // later deadline, listed first
+        a("a2", "2026-11-20", 4), // earlier deadline
       ],
-      availability: { weeklyHours: HOURS_2H, unavailableDates: [] },
+      availability: {
+        weeklyHours: HOURS_2H,
+        unavailableDates: ["2026-11-16", "2026-11-17", "2026-11-20"],
+      },
       now: NOW,
       options: { maxSessionHours: 2, bufferDays: 1 },
     });
-    // a2 (earlier deadline) should use days closer to its due date
-    // a1 (later deadline) should end up on earlier days
-    const a1Days = result.sessions.filter((s) => s.assignmentId === "a1").map((s) => s.date).sort();
-    const a2Days = result.sessions.filter((s) => s.assignmentId === "a2").map((s) => s.date).sort();
-    // a2 days should be on average later than a1 days (earlier deadline scheduled last in backward fill)
-    if (a1Days.length > 0 && a2Days.length > 0) {
-      expect(Math.max(...a2Days.map((d) => new Date(d).getTime()))).toBeGreaterThanOrEqual(
-        Math.min(...a1Days.map((d) => new Date(d).getTime())),
-      );
-    }
+    const hoursFor = (id: string) =>
+      result.sessions.filter((s) => s.assignmentId === id).reduce((sum, s) => sum + s.hours, 0);
+    expect(hoursFor("a2")).toBe(4);
+    expect(hoursFor("a1")).toBe(0);
+    expect(result.atRisk).toEqual([{ assignmentId: "a1", hoursShort: 4 }]);
   });
 
   test("at-risk: assignment that cannot fully fit reports hoursShort", () => {

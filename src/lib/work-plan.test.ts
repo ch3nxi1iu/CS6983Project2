@@ -5,7 +5,7 @@
 import "dotenv/config";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import { prisma } from "@/lib/db";
-import { regeneratePlanForUser, updateEstimatedHours } from "@/lib/work-plan";
+import { getWorkPlanForUser, regeneratePlanForUser, updateEstimatedHours } from "@/lib/work-plan";
 
 const createdUserIds: string[] = [];
 
@@ -120,7 +120,7 @@ describe("regeneratePlanForUser", () => {
       },
     });
     // Also create a SCHEDULED session that should be replaced
-    await prisma.workSession.create({
+    const oldScheduled = await prisma.workSession.create({
       data: {
         userId,
         assignmentId: assignment.id,
@@ -137,8 +137,12 @@ describe("regeneratePlanForUser", () => {
     const missed = all.filter((s) => s.status === "MISSED");
     expect(done.length).toBe(1);
     expect(missed.length).toBe(1);
-    // The old SCHEDULED session at Nov 16 10:00 may or may not still exist,
-    // but we should have exactly the new plan sessions (not the old stale one).
+
+    // The old SCHEDULED session is gone, not just shadowed by new rows.
+    expect(await prisma.workSession.findUnique({ where: { id: oldScheduled.id } })).toBeNull();
+    // What remains as SCHEDULED is exactly the new plan for the 2h assignment.
+    const scheduled = all.filter((s) => s.status === "SCHEDULED");
+    expect(scheduled.reduce((sum, s) => sum + s.hours, 0)).toBe(2);
   });
 
   test("respects unavailable dates set by the user", async () => {
@@ -218,5 +222,91 @@ describe("updateEstimatedHours", () => {
     if (!result.ok) {
       expect(result.error.code).toBe("VALIDATION_ERROR");
     }
+  });
+});
+
+describe("getWorkPlanForUser", () => {
+  test("returns a needs-availability result when the user has not set study hours", async () => {
+    const result = await getWorkPlanForUser(userId, NOW);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("availability_not_set");
+    }
+  });
+
+  test("returns only sessions from today through the next 6 days, with title and course code", async () => {
+    await setAvailability(userId);
+    const assignment = await prisma.assignment.create({
+      data: {
+        course: { create: { userId, code: "CS 6120", name: "NLP" } },
+        title: "Homework 3",
+        dueAt: new Date("2026-11-30T23:59:00Z"),
+        estimatedHours: 2,
+      },
+    });
+    const day = (dateKey: string) => new Date(`${dateKey}T00:00:00Z`);
+    await prisma.workSession.createMany({
+      data: [
+        { userId, assignmentId: assignment.id, startAt: day("2026-11-16"), hours: 1, status: "DONE" },
+        { userId, assignmentId: assignment.id, startAt: day("2026-11-17"), hours: 1, status: "MISSED" },
+        { userId, assignmentId: assignment.id, startAt: day("2026-11-22"), hours: 2, status: "SCHEDULED" },
+        // Outside the window: 7 days after today, and yesterday.
+        { userId, assignmentId: assignment.id, startAt: day("2026-11-23"), hours: 2, status: "SCHEDULED" },
+        { userId, assignmentId: assignment.id, startAt: day("2026-11-15"), hours: 2, status: "DONE" },
+      ],
+    });
+
+    const result = await getWorkPlanForUser(userId, NOW);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.sessions.map((s) => [s.date, s.status])).toEqual([
+        ["2026-11-16", "DONE"],
+        ["2026-11-17", "MISSED"],
+        ["2026-11-22", "SCHEDULED"],
+      ]);
+      expect(result.sessions[0]).toMatchObject({
+        assignmentId: assignment.id,
+        assignmentTitle: "Homework 3",
+        courseCode: "CS 6120",
+        hours: 1,
+      });
+    }
+  });
+
+  test("returns at-risk assignments with their title, course code and hours short", async () => {
+    await setAvailability(userId);
+    // Due Wed Nov 18 with a one-day buffer, so work must finish by Tue Nov 17.
+    // Mon Nov 16 and Tue Nov 17 offer 4h each: 8h of room for a 30h estimate, so 22h is short.
+    const assignment = await prisma.assignment.create({
+      data: {
+        course: { create: { userId, code: "CS 6120", name: "NLP" } },
+        title: "Project 1",
+        dueAt: new Date("2026-11-18T23:59:00Z"),
+        estimatedHours: 30,
+      },
+    });
+
+    const result = await getWorkPlanForUser(userId, NOW);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.atRisk).toEqual([
+        {
+          assignmentId: assignment.id,
+          assignmentTitle: "Project 1",
+          courseCode: "CS 6120",
+          hoursShort: 30 - 8,
+        },
+      ]);
+    }
+  });
+
+  test("does not write to the database", async () => {
+    await setAvailability(userId);
+    await createCourseWithAssignment(userId, new Date("2026-11-21T23:59:00Z"), 4);
+    const before = await prisma.workSession.count({ where: { userId } });
+
+    await getWorkPlanForUser(userId, NOW);
+
+    expect(await prisma.workSession.count({ where: { userId } })).toBe(before);
   });
 });

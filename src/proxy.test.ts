@@ -22,6 +22,25 @@ describe("Next.js proxy route protection", () => {
     expect(res.headers.get("location")).toBe("http://localhost:3000/login");
   });
 
+  test("redirects unauthenticated users from /plan to /login", async () => {
+    const req = new NextRequest("http://localhost:3000/plan");
+    const res = await proxy(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost:3000/login");
+  });
+
+  test("allows authenticated user to access /plan", async () => {
+    const token = await signSessionToken({ userId: "user-123" });
+    const req = new NextRequest("http://localhost:3000/plan", {
+      headers: { cookie: `session=${token}` },
+    });
+    const res = await proxy(req);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
+  });
+
   test("allows authenticated user to access /dashboard", async () => {
     const token = await signSessionToken({ userId: "user-123" });
     const req = new NextRequest("http://localhost:3000/dashboard", {
