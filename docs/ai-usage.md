@@ -10,8 +10,8 @@ open a PR.
 | Tool | Kind | Used by | Used for |
 |---|---|---|---|
 | Antigravity | AI IDE (P2's primary harness) | Chenxi | HW3 before/after runs of US-06; US-01 login (#39); start of US-07 work plan (#13). Free plan; quota ran out on 2026-11-13 |
-| GitHub Copilot (Free), VS Code | AI IDE | Chenxi | US-07 work plan from 2026-11-13, after the Antigravity quota ran out |
-| Claude Code | Terminal / desktop agent | Chenxi | Rules file drafts, PRD copy, schema, CI, deploy pipeline, diagrams, PR descriptions, merge-conflict fixes |
+| GitHub Copilot (Free), VS Code | AI IDE | Chenxi | Set up on 2026-11-13 as the IDE fallback after the Antigravity quota ran out (rules check so far) |
+| Claude Code | Terminal / desktop agent | Chenxi | Rules file drafts, PRD copy, schema, CI, deploy pipeline, diagrams, PR descriptions, merge-conflict fixes; a Haiku subagent finished the US-07 implementation (#13) after the Antigravity quota ran out |
 | Claude Code | Cloud agent | Brandy | AGENTS.md part B; US-04 demo mode, US-05 forecast, US-06 availability |
 | Claude (web, Artifacts) | Chat + artifacts | Brandy | The Loadline mockup |
 
@@ -39,7 +39,7 @@ has loaded `AGENTS.md`.
 | #38 | #5 | Chenxi | Claude Code | Wrote the deploy script and docs | Set up Vercel and Neon; merged by Chenxi without review (exception noted on the PR) |
 | #39 | #7 | Chenxi | Antigravity, Claude Code | Antigravity: tests, login, security fixes. Claude Code: reviewed the code, found two security issues, fixed a merge conflict | Wrote the prompts; set `AUTH_SECRET` in Vercel; review by Brandy pending |
 | #40 | #23 | Chenxi | Claude Code | Drew the diagrams from the schema and code | Review by Brandy pending |
-| (open) | #13 | Chenxi | Antigravity, then Copilot | Antigravity: failing tests and the `kind` migration | |
+| (open) | #13 | Chenxi | Antigravity, Claude Code (Haiku subagent) | Antigravity: failing tests and the `kind` migration. Haiku: finished the planner and data functions, kept and documented one test fix, added two tests | Chose to switch tools when the quota ran out; Claude Code reviewed the code and reran all checks |
 
 ## Prompts
 
