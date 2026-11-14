@@ -46,12 +46,17 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-/** Renders the page on the server, waits for Suspense, and returns text without React's comment markers. */
+/**
+ * Renders the page on the server, waits for Suspense, and returns the HTML.
+ * React separates adjacent text nodes with an empty comment ("5.5<!-- -->h"),
+ * so that exact marker is removed to let assertions match the visible text.
+ * This only ever sees our own rendered output, never user input.
+ */
 async function renderPage(): Promise<string> {
   const stream = await renderToReadableStream(<AvailabilityPage />);
   await stream.allReady;
   const html = await new Response(stream).text();
-  return html.replace(/<!--.*?-->/g, "");
+  return html.split("<!-- -->").join("");
 }
 
 describe("/settings/availability", () => {
