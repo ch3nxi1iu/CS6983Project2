@@ -214,7 +214,7 @@ describe("generateWorkPlan", () => {
 
   test("at-risk: assignment that cannot fully fit reports hoursShort", () => {
     // 1h/day, assignment needs 4h but only 2 days available before buffer deadline
-    const noHours: WeeklyHours = {
+    const oneHour: WeeklyHours = {
       monday: 1,
       tuesday: 1,
       wednesday: 1,
@@ -223,11 +223,12 @@ describe("generateWorkPlan", () => {
       saturday: 1,
       sunday: 1,
     };
-    // Due Nov 19 (Wed), bufferDays=1 → must finish by Nov 18 (Tue)
-    // Nov 16 (Mon) and Nov 17 (Tue) available — 2 days × 1h = 2h of 4h needed
+    // now = Mon Nov 16; due Nov 18 (Wed), bufferDays=1 → must finish by Nov 17 (Tue)
+    // Available days on or after today: Nov 16 (Mon) and Nov 17 (Tue) = 2h total
+    // Need 4h → 2h scheduled, 2h short
     const result = generateWorkPlan({
-      assignments: [a("a1", "2026-11-19", 4)],
-      availability: { weeklyHours: noHours, unavailableDates: [] },
+      assignments: [a("a1", "2026-11-18", 4)],
+      availability: { weeklyHours: oneHour, unavailableDates: [] },
       now: NOW,
       options: { maxSessionHours: 2, bufferDays: 1 },
     });
@@ -263,5 +264,37 @@ describe("generateWorkPlan", () => {
     expect(DEFAULT_HOURS_BY_KIND.EXAM).toBe(6);
     expect(DEFAULT_HOURS_BY_KIND.READING).toBe(2);
     expect(DEFAULT_HOURS_BY_KIND.OTHER).toBe(3);
+  });
+
+  test("uses the kind's default hours when an assignment has no estimate", () => {
+    // Not in the failing-test commit: added with the implementation.
+    const result = generateWorkPlan({
+      assignments: [
+        {
+          id: "project",
+          dueAt: new Date("2026-11-25T23:59:00Z"),
+          estimatedHours: null,
+          submitted: false,
+          kind: "PROJECT",
+        },
+      ],
+      availability: { weeklyHours: HOURS_4H, unavailableDates: [] },
+      now: NOW,
+      options: { maxSessionHours: 2, bufferDays: 1 },
+    });
+    expect(result.atRisk).toEqual([]);
+    const total = result.sessions.reduce((sum, s) => sum + s.hours, 0);
+    expect(total).toBe(DEFAULT_HOURS_BY_KIND.PROJECT);
+  });
+
+  test("rejects a maxSessionHours that would never finish a session", () => {
+    expect(() =>
+      generateWorkPlan({
+        assignments: [a("a1", "2026-11-21", 4)],
+        availability: { weeklyHours: HOURS_4H, unavailableDates: [] },
+        now: NOW,
+        options: { maxSessionHours: 0 },
+      }),
+    ).toThrow(RangeError);
   });
 });
