@@ -55,22 +55,9 @@ afterAll(async () => {
 
 describe("GET /api/api-keys", () => {
   test("returns 401 with the UNAUTHORIZED error shape when signed out", async () => {
-    const res = await GET(new Request("http://localhost:3000/api/api-keys"));
+    const res = await GET();
     expect(res.status).toBe(401);
     expect((await res.json()).error.code).toBe("UNAUTHORIZED");
-  });
-
-  test("returns 401 to a Bearer API key, because keys cannot manage keys", async () => {
-    const userId = await createTestUser();
-    createdUserIds.push(userId);
-    const { key } = await createApiKey(userId, "Script");
-
-    const res = await GET(
-      new Request("http://localhost:3000/api/api-keys", {
-        headers: { Authorization: `Bearer ${key}` },
-      }),
-    );
-    expect(res.status).toBe(401);
   });
 
   test("lists only the signed-in user's keys, with name, prefix and dates but never the key", async () => {
@@ -80,7 +67,7 @@ describe("GET /api/api-keys", () => {
     createdUserIds.push(otherId);
     await createApiKey(otherId, "Theirs");
 
-    const res = await GET(new Request("http://localhost:3000/api/api-keys"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const text = await res.text();
     const body = JSON.parse(text) as { apiKeys: Record<string, unknown>[] };

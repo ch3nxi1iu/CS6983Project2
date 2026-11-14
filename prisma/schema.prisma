@@ -27,6 +27,23 @@ model User {
   unavailableDates UnavailableDate[]
   courses          Course[]
   workSessions     WorkSession[]
+  apiKeys          ApiKey[]
+}
+
+// A personal key for the public API (#18). Only the SHA-256 hash of the key is
+// stored; the prefix is kept so the UI can show which key is which.
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  prefix     String
+  keyHash    String    @unique
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  @@index([userId])
 }
 
 // Study hours the user has for each weekday (#12). Defaults match the mockup:
