@@ -6,6 +6,7 @@ export {
 } from "./jwt";
 export {
   createSession,
+  getCurrentUser,
   getSession,
   requireUser,
   clearSession,

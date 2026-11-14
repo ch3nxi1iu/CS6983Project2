@@ -60,6 +60,16 @@ export async function clearSession(): Promise<void> {
 }
 
 /**
+ * Like requireUser, but returns null instead of redirecting. Route handlers use
+ * this to answer 401 JSON, since a redirect is wrong for an API call.
+ */
+export async function getCurrentUser() {
+  const session = await getSession();
+  if (!session?.userId) return null;
+  return prisma.user.findUnique({ where: { id: session.userId } });
+}
+
+/**
  * Ensures the user is authenticated. If authenticated, returns the user
  * from the database. If not authenticated, redirects to /login.
  */
