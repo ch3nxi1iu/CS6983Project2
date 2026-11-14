@@ -51,3 +51,9 @@ Locally, they go in `.env` (see `.env.example`).
 
 An interactive desktop and mobile mockup of Loadline is in
 [`docs/mockups/loadline-mockup.html`](docs/mockups/loadline-mockup.html). Open it in a browser.
+
+## Documentation
+
+- [Architecture](docs/architecture.md): system diagram and delivery pipeline
+- [Database schema](docs/database.md): tables, relations, and constraints
+- [Product requirements](docs/PRD.md)
