@@ -39,7 +39,7 @@ has loaded `AGENTS.md`.
 | #38 | #5 | Chenxi | Claude Code | Wrote the deploy script and docs | Set up Vercel and Neon; merged by Chenxi without review (exception noted on the PR) |
 | #39 | #7 | Chenxi | Antigravity, Claude Code | Antigravity: tests, login, security fixes. Claude Code: reviewed the code, found two security issues, fixed a merge conflict | Wrote the prompts; set `AUTH_SECRET` in Vercel; review by Brandy pending |
 | #40 | #23 | Chenxi | Claude Code | Drew the diagrams from the schema and code | Review by Brandy pending |
-| (open) | #13 | Chenxi | Antigravity, Claude Code (Haiku subagent) | Antigravity: failing tests and the `kind` migration. Haiku: finished the planner and data functions, kept and documented one test fix, added two tests | Chose to switch tools when the quota ran out; Claude Code reviewed the code and reran all checks |
+| (open) | #13 | Chenxi | Antigravity, Claude Code (Haiku subagent) | Antigravity: failing tests and the `kind` migration. Haiku: the planner and data functions, then (after login merged) failing tests for and the `/api/plan`, `/api/assignments/[id]` routes and `/plan` page, and two strengthened tests | Chose to switch tools when the quota ran out; Claude Code reviewed the code, reran all checks, and tried the plan in a browser with sample data |
 
 ## Prompts
 
