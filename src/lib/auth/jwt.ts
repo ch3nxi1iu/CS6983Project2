@@ -4,10 +4,16 @@ export interface SessionPayload {
   userId: string;
 }
 
-const DEFAULT_SECRET = "development-secret-key-cs6983-project2-auth-jwt";
+const TEST_SECRET = "test-secret-key-cs6983-project2-auth-jwt";
 
 function getSecretKey(): Uint8Array {
-  const secret = process.env.AUTH_SECRET || DEFAULT_SECRET;
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "test") {
+      return new TextEncoder().encode(TEST_SECRET);
+    }
+    throw new Error("AUTH_SECRET environment variable is required.");
+  }
   return new TextEncoder().encode(secret);
 }
 

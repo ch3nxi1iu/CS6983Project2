@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { signSessionToken } from "@/lib/auth/jwt";
 
 describe("JWT auth secret handling", () => {

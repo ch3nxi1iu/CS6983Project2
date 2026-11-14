@@ -8,7 +8,10 @@ import {
 } from "@/lib/auth/session";
 
 function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (email.length > 254) {
+    return false;
+  }
+  return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(email);
 }
 
 export async function POST(request: Request) {

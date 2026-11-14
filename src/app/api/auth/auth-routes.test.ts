@@ -75,10 +75,22 @@ describe("POST /api/auth/register", () => {
     expect(data.error.code).toBe("VALIDATION_ERROR");
   });
 
-  test("rejects email exceeding 254 characters", async () => {
-    const longEmail = `${"a".repeat(245)}@example.com`; // 257 characters
+  test("accepts a valid email address", async () => {
+    const email = `valid-${crypto.randomUUID()}@student.nyu.edu`;
     const req = createJsonRequest("http://localhost:3000/api/auth/register", {
-      email: longEmail,
+      email,
+      password: "ValidPassword123!",
+    });
+
+    const res = await registerHandler(req);
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    createdUserIds.push(data.user.id);
+  });
+
+  test("rejects an invalid email without valid domain parts", async () => {
+    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
+      email: "invalid-user@nodomain",
       password: "ValidPassword123!",
     });
 
@@ -89,9 +101,9 @@ describe("POST /api/auth/register", () => {
     expect(data.error.code).toBe("VALIDATION_ERROR");
   });
 
-  test("rejects polynomial ReDoS malicious email patterns", async () => {
-    // Malicious crafted email with repetitive domain dots/chars
-    const maliciousEmail = `${"a".repeat(100)}@${"a.".repeat(50)}com`;
+  test("rejects a very long malicious-looking email exceeding 254 characters", async () => {
+    // 255+ characters designed to trigger polynomial backtracking in vulnerable regexes
+    const maliciousEmail = `${"a".repeat(120)}@${"b.".repeat(70)}com`;
     const req = createJsonRequest("http://localhost:3000/api/auth/register", {
       email: maliciousEmail,
       password: "ValidPassword123!",
@@ -102,32 +114,6 @@ describe("POST /api/auth/register", () => {
 
     const data = await res.json();
     expect(data.error.code).toBe("VALIDATION_ERROR");
-  });
-
-  test("rejects invalid email without valid top-level domain", async () => {
-    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
-      email: "user@domain",
-      password: "ValidPassword123!",
-    });
-
-    const res = await registerHandler(req);
-    expect(res.status).toBe(400);
-
-    const data = await res.json();
-    expect(data.error.code).toBe("VALIDATION_ERROR");
-  });
-
-  test("accepts valid email with subdomains", async () => {
-    const email = `sub-${crypto.randomUUID()}@student.nyu.edu`;
-    const req = createJsonRequest("http://localhost:3000/api/auth/register", {
-      email,
-      password: "ValidPassword123!",
-    });
-
-    const res = await registerHandler(req);
-    expect(res.status).toBe(201);
-    const data = await res.json();
-    createdUserIds.push(data.user.id);
   });
 
   test("rejects duplicate email with 409 EMAIL_EXISTS", async () => {

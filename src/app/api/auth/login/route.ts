@@ -7,6 +7,9 @@ import {
   SESSION_COOKIE_NAME,
 } from "@/lib/auth/session";
 
+// Fixed dummy bcrypt hash used when an email is not found to prevent timing attacks.
+const DUMMY_HASH = "$2a$10$e8k8y.mZ1qA490OomQ8HDeuQ9B3l3qH0Jm3fXWjZ0d8F.R4L1L6aG";
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -40,6 +43,11 @@ export async function POST(request: Request) {
     where: { email: normalizedEmail },
   });
 
+  // Run verifyPassword against the real hash if the user exists, or against a fixed
+  // dummy hash if not, so both failure paths take the same amount of time.
+  const hashToVerify = user ? user.passwordHash : DUMMY_HASH;
+  const isPasswordValid = await verifyPassword(password, hashToVerify);
+
   // Never reveal whether the email exists or the password was wrong
   const CREDENTIALS_ERROR = {
     error: {
@@ -48,12 +56,7 @@ export async function POST(request: Request) {
     },
   };
 
-  if (!user) {
-    return NextResponse.json(CREDENTIALS_ERROR, { status: 401 });
-  }
-
-  const isPasswordValid = await verifyPassword(password, user.passwordHash);
-  if (!isPasswordValid) {
+  if (!user || !isPasswordValid) {
     return NextResponse.json(CREDENTIALS_ERROR, { status: 401 });
   }
 
