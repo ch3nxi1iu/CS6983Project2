@@ -7,8 +7,13 @@ export async function proxy(request: NextRequest) {
   const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = sessionToken ? await verifySessionToken(sessionToken) : null;
 
-  // Protect /dashboard and /settings pages: redirect unauthenticated users to /login
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/settings")) {
+  // Protect /dashboard, /settings and /plan pages: redirect unauthenticated users to /login
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/settings") ||
+    pathname === "/plan" ||
+    pathname.startsWith("/plan/")
+  ) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url));
     }

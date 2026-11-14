@@ -27,13 +27,23 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-// The Rebuild button calls the Next.js router; the rest of the page does not navigate.
+// The Rebuild button calls the Next.js router; nothing in these tests navigates.
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
   redirect: vi.fn(),
 }));
 
-import PlanPage from "@/app/plan/page";
+// Test-environment shim: jsdom's TextEncoder returns bytes that jose rejects as an HS256
+// key (they come from another realm). Copying them into this realm fixes it. The app code
+// is unchanged, and the sessions are still real signed JWTs.
+class SameRealmTextEncoder {
+  encode(text: string): Uint8Array {
+    return Uint8Array.from(Buffer.from(text, "utf8"));
+  }
+}
+vi.stubGlobal("TextEncoder", SameRealmTextEncoder);
+
+import WorkPlanSection from "@/components/WorkPlanSection";
 
 const createdUserIds: string[] = [];
 
@@ -42,6 +52,15 @@ async function signIn(): Promise<string> {
   createdUserIds.push(userId);
   await createSession(userId);
   return userId;
+}
+
+/**
+ * Renders what /plan shows. The page wraps WorkPlanSection in <Suspense>, but
+ * React's client renderer cannot render an async Server Component, so the test
+ * awaits the section and renders its output directly.
+ */
+async function renderPlan() {
+  render(await WorkPlanSection());
 }
 
 beforeEach(() => {
@@ -57,12 +76,12 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-describe("/plan page", () => {
+describe("/plan page content", () => {
   test("tells the user to set study hours, with a link to availability settings, when hours are not set", async () => {
     await signIn();
-    render(<PlanPage />);
+    await renderPlan();
 
-    const link = await screen.findByRole("link", { name: /set your study hours/i });
+    const link = screen.getByRole("link", { name: /set your study hours/i });
     expect(link.getAttribute("href")).toBe("/settings/availability");
     expect(screen.queryByRole("button", { name: "Rebuild plan" })).toBeNull();
   });
@@ -83,10 +102,10 @@ describe("/plan page", () => {
       ],
     });
 
-    render(<PlanPage />);
+    await renderPlan();
 
-    expect(await screen.findByRole("button", { name: "Rebuild plan" })).toBeDefined();
-    const dayLists = await screen.findAllByRole("list", { name: /^Sessions on / });
+    expect(screen.getByRole("button", { name: "Rebuild plan" })).toBeDefined();
+    const dayLists = screen.getAllByRole("list", { name: /^Sessions on / });
     expect(dayLists).toHaveLength(7);
 
     const today = within(dayLists[0]);
@@ -110,11 +129,11 @@ describe("/plan page", () => {
       estimatedHours: 5,
     });
 
-    render(<PlanPage />);
+    await renderPlan();
 
-    const atRisk = await screen.findByRole("region", { name: "At risk" });
-    expect(within(atRisk).getByText(/Project 1/)).toBeDefined();
-    expect(within(atRisk).getByText(/CS 6120/)).toBeDefined();
+    const atRisk = screen.getByRole("region", { name: "At risk" });
+    expect(within(atRisk).getByText("Project 1")).toBeDefined();
+    expect(within(atRisk).getByText("CS 6120")).toBeDefined();
     expect(within(atRisk).getByText("5h short")).toBeDefined();
   });
 });
