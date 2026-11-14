@@ -40,6 +40,7 @@ has loaded `AGENTS.md`.
 | #39 | #7 | Chenxi | Antigravity, Claude Code | Antigravity: tests, login, security fixes. Claude Code: reviewed the code, found two security issues, fixed a merge conflict | Wrote the prompts; set `AUTH_SECRET` in Vercel; review by Brandy pending |
 | #40 | #23 | Chenxi | Claude Code | Drew the diagrams from the schema and code | Review by Brandy pending |
 | (open) | #13 | Chenxi | Antigravity, Claude Code (Haiku subagent) | Antigravity: failing tests and the `kind` migration. Haiku: the planner and data functions, then (after login merged) failing tests for and the `/api/plan`, `/api/assignments/[id]` routes and `/plan` page, and two strengthened tests | Chose to switch tools when the quota ran out; Claude Code reviewed the code, reran all checks, and tried the plan in a browser with sample data |
+| (open) | #12 | Chenxi | Claude Code (Haiku subagent) | Failing tests, then `PUT`/`GET /api/availability`, `POST`/`DELETE /api/unavailable-dates` and the `/settings/availability` page wrapping Brandy's existing component | Asked for it when the settings screen turned out to be missing; Claude Code reviewed it, reran all checks, and tried saving hours and dates in a browser |
 
 ## Prompts
 
