@@ -9,12 +9,14 @@ import {
   type WeeklyHours,
 } from "@/lib/planner/availability";
 import { startOfWeek, toLocalDateKey } from "@/lib/planner/forecast";
+import type { AssignmentKind } from "@/lib/planner/work-plan";
 
 export type DemoAssignment = {
   title: string;
   dueAt: Date;
   points: number;
   estimatedHours: number;
+  kind: AssignmentKind;
   submitted: boolean;
 };
 
@@ -26,44 +28,44 @@ export type DemoData = {
   courses: DemoCourse[];
 };
 
-// [week from this week, day of week (0 = Monday), hours, title, points, submitted?]
-type Plan = [number, number, number, string, number, boolean?];
+// [week, day (0=Mon), hours, title, points, kind, submitted?]
+type Plan = [number, number, number, string, number, AssignmentKind, boolean?];
 
 const COURSE_PLANS: { code: string; name: string; plan: Plan[] }[] = [
   {
     code: "DEMO 5010",
     name: "Database Systems",
     plan: [
-      [0, 1, 3, "SQL warm-up quiz", 10, true],
-      [0, 3, 6, "Schema design homework", 50],
-      [1, 2, 8, "Query optimization project", 100],
-      [3, 4, 12, "Final project report", 150],
+      [0, 1, 3, "SQL warm-up quiz", 10, "HOMEWORK", true],
+      [0, 3, 6, "Schema design homework", 50, "HOMEWORK"],
+      [1, 2, 8, "Query optimization project", 100, "PROJECT"],
+      [3, 4, 12, "Final project report", 150, "PROJECT"],
     ],
   },
   {
     code: "DEMO 5220",
     name: "Human-Computer Interaction",
     plan: [
-      [0, 4, 4, "Interview notes", 20],
-      [1, 3, 6, "Prototype critique", 40],
-      [2, 2, 5, "Usability test plan", 40],
+      [0, 4, 4, "Interview notes", 20, "HOMEWORK"],
+      [1, 3, 6, "Prototype critique", 40, "HOMEWORK"],
+      [2, 2, 5, "Usability test plan", 40, "PROJECT"],
     ],
   },
   {
     code: "DEMO 6300",
     name: "Distributed Systems",
     plan: [
-      [1, 4, 7, "Raft lab, part 1", 80],
-      [2, 4, 3, "Reading response", 15],
-      [3, 2, 4, "Raft lab, part 2", 80],
+      [1, 4, 7, "Raft lab, part 1", 80, "PROJECT"],
+      [2, 4, 3, "Reading response", 15, "READING"],
+      [3, 2, 4, "Raft lab, part 2", 80, "PROJECT"],
     ],
   },
   {
     code: "DEMO 6120",
     name: "Research Methods",
     plan: [
-      [1, 0, 5, "Literature review draft", 60],
-      [3, 0, 2, "Peer review", 10],
+      [1, 0, 5, "Literature review draft", 60, "HOMEWORK"],
+      [3, 0, 2, "Peer review", 10, "READING"],
     ],
   },
 ];
@@ -86,13 +88,16 @@ export function buildDemoData(now: Date): DemoData {
     courses: COURSE_PLANS.map(({ code, name, plan }) => ({
       code,
       name,
-      assignments: plan.map(([week, day, estimatedHours, title, points, submitted = false]) => ({
-        title,
-        dueAt: dueAt(weekStart, week, day),
-        points,
-        estimatedHours,
-        submitted,
-      })),
+      assignments: plan.map(
+        ([week, day, estimatedHours, title, points, kind, submitted = false]) => ({
+          title,
+          dueAt: dueAt(weekStart, week, day),
+          points,
+          estimatedHours,
+          kind,
+          submitted,
+        }),
+      ),
     })),
   };
 }

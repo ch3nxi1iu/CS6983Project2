@@ -70,17 +70,26 @@ model Course {
   @@unique([userId, code])
 }
 
+enum AssignmentKind {
+  HOMEWORK
+  PROJECT
+  EXAM
+  READING
+  OTHER
+}
+
 model Assignment {
-  id             String        @id @default(cuid())
+  id             String         @id @default(cuid())
   courseId       String
-  course         Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course         Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   title          String
   dueAt          DateTime
   points         Float?
   estimatedHours Float
-  submitted      Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  kind           AssignmentKind @default(OTHER)
+  submitted      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   workSessions   WorkSession[]
 
   @@index([courseId, dueAt])

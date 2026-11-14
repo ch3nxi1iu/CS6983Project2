@@ -18,7 +18,13 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-import { createSession, getSession, requireUser, clearSession } from "@/lib/auth/session";
+import {
+  createSession,
+  getCurrentUser,
+  getSession,
+  requireUser,
+  clearSession,
+} from "@/lib/auth/session";
 
 const createdUserIds: string[] = [];
 
@@ -68,6 +74,14 @@ describe("session helpers", () => {
 
     await clearSession();
     expect(await getSession()).toBeNull();
+  });
+
+  test("getCurrentUser returns the signed-in user, or null without a session", async () => {
+    const user = await createUser();
+    expect(await getCurrentUser()).toBeNull();
+
+    await createSession(user.id);
+    expect((await getCurrentUser())?.id).toBe(user.id);
   });
 
   test("requireUser returns the user record from the database", async () => {
