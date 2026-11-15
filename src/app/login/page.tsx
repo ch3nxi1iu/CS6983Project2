@@ -32,6 +32,10 @@ export default function LoginPage() {
       }
 
       router.push("/dashboard");
+      // The root layout is already rendered for this signed-out page, so a
+      // client navigation alone leaves the header empty. Refresh re-reads the
+      // new session cookie. Tests stub a router with no refresh method.
+      router.refresh?.();
     } catch {
       setError("An unexpected error occurred. Please try again.");
       setSubmitting(false);
