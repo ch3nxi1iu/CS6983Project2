@@ -342,7 +342,7 @@ export const openApiSpec: OpenApiDocument = {
           isCrunch: {
             type: "boolean",
             description:
-              "True when the work due that week needs more hours than the user's study time. The app labels these weeks \"More work than time\".",
+              "True when the work due that week needs more hours than the user's study time. The app shows this as an \"overloaded week\".",
           },
           byCourse: {
             type: "array",

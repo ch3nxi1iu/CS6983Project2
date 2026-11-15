@@ -28,14 +28,14 @@ function hours(value: number) {
   return `${Math.round(value * 10) / 10}h`;
 }
 
-// The UI says "More work than time", not "crunch week": "crunch" is an idiom
-// many international students don't know. The data still calls it isCrunch.
-const CRUNCH_LABEL = "More work than time";
+// The UI says "Overloaded week", not "crunch week": "crunch" is an idiom many
+// international students don't know. The data still calls it isCrunch.
+const CRUNCH_LABEL = "Overloaded week";
 const CRUNCH_DEFINITION = `${CRUNCH_LABEL}: the work due that week needs more hours than your study time.`;
 
 function crunchSummary(count: number) {
-  if (count === 0) return "Every week has enough study time for the work due.";
-  return `${count} ${count === 1 ? "week" : "weeks"} with more work than time`;
+  if (count === 0) return "No overloaded weeks ahead. Your study time covers the work due in every week.";
+  return `${count} overloaded ${count === 1 ? "week" : "weeks"} ahead`;
 }
 
 export default function WeekForecast({ weeks }: Props) {
