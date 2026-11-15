@@ -4,7 +4,8 @@ Loadline turns course deadlines into a calm plan. It shows which weeks will
 be overloaded (more work due than you have study time for), and splits each
 assignment into daily work sessions that fit the study hours you set.
 
-**Live app:** https://loadline-cs6983-loadline1.vercel.app
+**Live app:** https://loadline-cs6983-loadline1.vercel.app. Click **Try the
+demo** to look around with sample data; no account or Canvas login needed.
 
 Pair project for CS 6983 (AI Coding), Fall 2026, by
 [@ch3nxi1iu](https://github.com/ch3nxi1iu) and [@brandy-wang](https://github.com/brandy-wang).
@@ -17,7 +18,9 @@ Prisma 7 · Vitest + Testing Library · Vercel + Neon.
 | Feature | Story | Where |
 |---|---|---|
 | Sign up and sign in; the session is a JWT in an httpOnly cookie | [US-01](https://github.com/ch3nxi1iu/CS6983Project2/issues/7) | `/register`, `/login` |
-| Workload forecast: for each of the next 4 weeks, the hours of work due against your study time; weeks where the work needs more hours than your study time are marked **Overloaded week** | [US-05](https://github.com/ch3nxi1iu/CS6983Project2/issues/11) | `GET /api/workload` |
+| Demo mode: a demo account with sample courses and assignments, a "Demo mode" banner, and a button to reset the sample data | [US-04](https://github.com/ch3nxi1iu/CS6983Project2/issues/10) | **Try the demo** on `/` |
+| Dashboard: the forecast and today's work sessions on one page | [US-05](https://github.com/ch3nxi1iu/CS6983Project2/issues/11), [US-07](https://github.com/ch3nxi1iu/CS6983Project2/issues/13) | `/dashboard` |
+| Workload forecast: for each of the next 4 weeks, the hours of work due against your study time; weeks where the work needs more hours than your study time are marked **Overloaded week** | [US-05](https://github.com/ch3nxi1iu/CS6983Project2/issues/11) | `/dashboard`, `GET /api/workload` |
 | Weekly study hours and days off; changing them re-plans | [US-06](https://github.com/ch3nxi1iu/CS6983Project2/issues/12) | `/settings/availability` |
 | Work plan: each assignment split into sessions before its due date, with at-risk warnings | [US-07](https://github.com/ch3nxi1iu/CS6983Project2/issues/13) | `/plan` |
 | Public REST API with personal API keys and interactive docs | [US-12](https://github.com/ch3nxi1iu/CS6983Project2/issues/18) | `/docs/api`, `/settings/api` |
@@ -25,6 +28,16 @@ Prisma 7 · Vitest + Testing Library · Vercel + Neon.
 Not built in this project: connecting a real Canvas account (US-02, US-03; demo
 data stands in for it), study groups and live group progress (US-10, US-11), and
 the stretch stories. The [PRD](docs/PRD.md) lists every story.
+
+## Screenshots
+
+| Landing page | Dashboard in demo mode |
+|---|---|
+| <img src="docs/screenshots/landing-desktop.png" alt="Landing page with the Forecast, Work plan and Public API features, and the Try the demo, Sign up and Log in buttons" width="420"> | <img src="docs/screenshots/demo-dashboard-desktop.png" alt="Dashboard in demo mode: the demo banner, and a 4-week forecast where the week of Nov 16 is marked Overloaded week (26h of work, 18h study time)" width="420"> |
+
+On a phone, the same pages stack into one column:
+
+<img src="docs/screenshots/landing-mobile.png" alt="Landing page on a phone" width="220"> <img src="docs/screenshots/demo-dashboard-mobile.png" alt="Demo dashboard on a phone" width="220">
 
 ## Run it locally
 
@@ -53,7 +66,8 @@ npx prisma migrate deploy
 npm run dev            # http://localhost:3000
 ```
 
-Create an account at `/register`, set your study hours on
+Click **Try the demo** on the home page to get a demo account with sample
+data, or create an account at `/register`, set your study hours on
 `/settings/availability`, and open `/plan`.
 
 ### Environment variables
@@ -142,4 +156,7 @@ Variables), never in the repo. Diagrams of the system and the pipeline are in
 - [Architecture](docs/architecture.md): system and delivery pipeline diagrams
 - [Database schema](docs/database.md): tables, relations, and constraints
 - [AGENTS.md](AGENTS.md): the shared rules file both partners' AI tools follow
+- [Sprint 1](docs/sprints/sprint-1.md) and [Sprint 2](docs/sprints/sprint-2.md): plans, standups, and retrospectives
+- [Contribution log](docs/contributions.md): who did what
+- [AI usage log](docs/ai-usage.md): which AI tool did what, PR by PR
 - [Mockup](docs/mockups/loadline-mockup.html): interactive desktop and mobile mockup; open it in a browser
