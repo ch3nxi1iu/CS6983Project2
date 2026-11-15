@@ -8,12 +8,13 @@ Dashed boxes are planned but not built yet.
 ```mermaid
 flowchart LR
   browser(["Student's browser"])
+  client(["API client<br/>script or app with a personal API key"])
 
   subgraph vercel["Vercel: Next.js 16 app"]
     proxy["proxy.ts<br/>checks the session cookie"]
-    pages["Pages<br/>Server Components by default<br/>/login · /register · /dashboard · /settings · /plan"]
-    api["API routes<br/>/api/auth/* · /api/plan · /api/assignments"]
-    lib["src/lib<br/>auth · planner (pure functions)<br/>availability · forecast · demo"]
+    pages["Pages<br/>Server Components by default<br/>/login · /register · /dashboard · /settings · /plan<br/>/docs/api (Swagger UI)"]
+    api["API routes<br/>app: /api/auth/* · /api/plan · /api/assignments<br/>/api/availability · /api/unavailable-dates · /api/api-keys<br/>public: /api/tasks · /api/plan/today · /api/workload<br/>/api/work-sessions/{id}/complete · /openapi.json"]
+    lib["src/lib<br/>auth · planner (pure functions)<br/>availability · work plan · forecast<br/>api keys · rate limit · demo"]
     db["Prisma client<br/>src/lib/db.ts"]
   end
 
@@ -21,7 +22,8 @@ flowchart LR
   canvas["Canvas API<br/>planned: #8, #9"]
   realtime["Real-time channel<br/>planned: #17"]
 
-  browser -->|HTTPS| proxy
+  browser -->|HTTPS, session cookie| proxy
+  client -->|HTTPS, Bearer key| proxy
   proxy --> pages
   proxy --> api
   pages --> lib
@@ -41,8 +43,14 @@ flowchart LR
 - **API:** route handlers in `src/app/api/` validate input, call `src/lib`, and
   return JSON. Errors use one shape: `{ "error": { "code", "message" } }`.
 - **Auth:** `proxy.ts` runs before every request. Signed-out users are sent
-  from `/dashboard` and `/settings` to `/login`, and `/api` routes (except
-  `/api/auth/*`) return 401. The session is a JWT in an httpOnly cookie.
+  from `/dashboard`, `/settings` and `/plan` to `/login`, and `/api` routes
+  (except `/api/auth/*`) return 401. The session is a JWT in an httpOnly cookie.
+- **Public API:** a request with `Authorization: Bearer <key>` passes the proxy,
+  and the route checks the personal API key itself (`src/lib/api/authenticate.ts`).
+  Keys are created and revoked on `/settings/api`. Every caller is limited to 60
+  requests a minute (429 with `Retry-After`); the limit is kept in memory, so it
+  applies per server instance. The OpenAPI 3.1 spec is served at `/openapi.json`
+  and shown at `/docs/api`.
 - **Logic:** scheduling, forecast, and availability math live in
   `src/lib/planner/` as pure functions, so they're tested without a database.
 - **Database:** every query goes through the one Prisma client in
