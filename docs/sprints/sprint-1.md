@@ -66,7 +66,13 @@ The Oct 30 entries also use our Slack messages from that day.
 - The rules file and HW3 took the whole sprint; we started building late.
 
 **Partner feedback**
-- Chenxi on Brandy: _(Chenxi to write)_
+- Chenxi on Brandy:
+  - *Went well:* we worked well together and communicated well. When I
+    reviewed the mockup on Slack, Brandy took the feedback the same day: she
+    added the availability screen and wrote her part of `AGENTS.md` covering
+    the points we agreed on.
+  - *Could improve:* we can start earlier and stick to the sprint schedule.
+    We both started building late, so the Sprint 1 MVP slipped.
 - Brandy on Chenxi: Chenxi set up the structure the whole project runs on
   (the repo, board, milestones and the 24 issues from the PRD), so it was
   always clear what came next. Their review of my mockup was specific and

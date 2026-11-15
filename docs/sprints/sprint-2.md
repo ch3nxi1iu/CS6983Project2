@@ -95,7 +95,18 @@ show something, the cell says so.
   squeezed the work into the last few days.
 
 **Partner feedback**
-- Chenxi on Brandy: _(Chenxi to write)_
+- Chenxi on Brandy:
+  - *Went well:* we worked well together with good communication, especially
+    when we had no free AI IDE usage left. We talked about who would use
+    which tool (Brandy on Cursor; me on Claude Code after Antigravity's quota
+    ran out), so the work kept moving. Brandy kept to test-first on every
+    feature, found the CodeQL problem in #42 and suggested the exact fix, and
+    when the stacked PRs missed `main` she opened #37 right away to recover
+    them. On Nov 14 she reviewed my last PRs quickly, so they merged the
+    same evening.
+  - *Could improve:* we can start earlier and stick to the sprint schedule.
+    Most of the work landed in the last few days, and we needed an
+    extension.
 - Brandy on Chenxi: Chenxi kept the project moving when time got short. They
   re-planned the sprint into a clear two-day plan, split the files so we
   never blocked each other, and still delivered a large share of the app:
