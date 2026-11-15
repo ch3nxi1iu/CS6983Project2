@@ -21,7 +21,7 @@ project board, and our notes.
 | CI (lint, typecheck, tests on Postgres, build, audit, CodeQL) and branch protection | #4 | Chenxi | Done, [#36](https://github.com/ch3nxi1iu/CS6983Project2/pull/36) |
 | US-06 study hours and days off | #12 | Brandy, Chenxi | Done: data layer [#33](https://github.com/ch3nxi1iu/CS6983Project2/pull/33) (Brandy); page and API [#42](https://github.com/ch3nxi1iu/CS6983Project2/pull/42), re-plan on change [#50](https://github.com/ch3nxi1iu/CS6983Project2/pull/50) (Chenxi) |
 | US-05 workload forecast | #11 | Brandy | Done, [#34](https://github.com/ch3nxi1iu/CS6983Project2/pull/34) → [#37](https://github.com/ch3nxi1iu/CS6983Project2/pull/37); plain wording [#54](https://github.com/ch3nxi1iu/CS6983Project2/pull/54) (Chenxi) |
-| US-04 demo data, reset and banner | #10 | Brandy | Data and banner done ([#35](https://github.com/ch3nxi1iu/CS6983Project2/pull/35) → [#37](https://github.com/ch3nxi1iu/CS6983Project2/pull/37)); landing page and "Try the demo" in progress |
+| US-04 demo data, reset and banner | #10 | Brandy | Done: data and banner ([#35](https://github.com/ch3nxi1iu/CS6983Project2/pull/35) → [#37](https://github.com/ch3nxi1iu/CS6983Project2/pull/37)); landing page, "Try the demo" and reset route ([#56](https://github.com/ch3nxi1iu/CS6983Project2/pull/56)) |
 | Deploy pipeline (Vercel + Neon, migrations on production only) | #5 | Chenxi | Done, [#38](https://github.com/ch3nxi1iu/CS6983Project2/pull/38) |
 | US-01 sign-up and login | #7 | Chenxi | Done, [#39](https://github.com/ch3nxi1iu/CS6983Project2/pull/39); sign-up fix [#49](https://github.com/ch3nxi1iu/CS6983Project2/pull/49) (#46) |
 | Architecture and database diagrams | #23 | Chenxi | Done, [#40](https://github.com/ch3nxi1iu/CS6983Project2/pull/40) |
@@ -50,8 +50,7 @@ show something, the cell says so.
 | Nov 12 | Chenxi | Extension granted to Sun Nov 15; re-planned to finish by Saturday night | Deploy pipeline (#5), login (#7) | Not recorded |
 | Nov 13 | Chenxi | Merged the deploy pipeline (#38) and login (#39, written in Antigravity) with an exception noted on each PR, because Brandy was unavailable to review; opened the diagrams (#40); drafted the AI usage log; started the work plan (#13) in Antigravity | Work plan routes and page; settings page | Antigravity's free quota ran out mid-#13; production sign-up failed until `AUTH_SECRET` was set |
 | Nov 14 | Chenxi | Opened and landed the work plan (#41), study hours page and API (#42, with Brandy's CodeQL fix), public API (#43), sign-up fix (#49), re-plan on changes (#50), README (#51), AI usage log (#52) and plain forecast wording (#54); reviewed and approved #48 | Sprint docs (#24), coverage (#47), E2E (#6), README screenshots, demo video | Playwright needs Brandy's OK as a new dependency |
-| Nov 14 | Brandy | Reviewed #42 and found the CodeQL failure came from a regex in a test; suggested a one-line fix, which Chenxi committed. Wrote the failing tests for the dashboard (#44); Cursor wrote the implementation against them (#48, merged). Reviewed and approved #43, #49, #50, #51, #52 and #54; approved adding the coverage tool (#47) | The landing page and "Try the demo" (#10), then an end-to-end check on the live site | _(Brandy to fill)_ |
-| _(date)_ | Brandy | _(Brandy to add any other Sprint 2 standups she posted elsewhere, with their real dates)_ | | |
+| Nov 14 | Brandy | Reviewed #42 and found the CodeQL failure came from a regex in a test; suggested a one-line fix, which Chenxi committed. Wrote the failing tests for the dashboard (#44); Cursor wrote the implementation against them (#48, merged). Reviewed and approved #43, #49, #50, #51, #52 and #54; approved adding the coverage tool (#47) | The landing page and "Try the demo" (#10), then an end-to-end check on the live site | None |
 
 ## Retrospective
 
@@ -68,7 +67,10 @@ show something, the cell says so.
   tests, config and docs for Chenxi) meant no merge conflicts.
 - Production deploys run migrations first, and previews never migrate, so an
   unmerged migration can't change the shared database.
-- _(Brandy to add)_
+- Good teamwork and collaboration: when the deadline got close we re-planned
+  together, split the work cleanly, reviewed each other's PRs quickly, and
+  helped fix each other's problems (the CodeQL fix in #42, the stacked-PR
+  recovery in #37).
 
 **What didn't go well**
 - Almost all feature work landed in the last days (Nov 10, 13, 14), and we
@@ -88,11 +90,21 @@ show something, the cell says so.
   was written with Claude Code rather than the AI IDE (see the
   [AI usage log](../ai-usage.md)).
 - The README PR (#51) merged while still a draft, before its last fixes.
-- _(Brandy to add)_
+- We started building the app a bit late. Because Sprint 1 shipped no
+  features, Sprint 2 began with the whole MVP still to do, which is what
+  squeezed the work into the last few days.
 
 **Partner feedback**
 - Chenxi on Brandy: _(Chenxi to write)_
-- Brandy on Chenxi: _(Brandy to write)_
+- Brandy on Chenxi: Chenxi kept the project moving when time got short. They
+  re-planned the sprint into a clear two-day plan, split the files so we
+  never blocked each other, and still delivered a large share of the app:
+  CI, deploys, login, the work plan and the public API. Their PRs were easy
+  to review because each one explained what changed, how to test it, and
+  what could go wrong. They also built the pages my data code needed
+  (#42, #50), and their plain-wording change (#54) made the forecast clearer
+  for every student. A reliable, thoughtful partner I'd gladly work with
+  again.
 
 **Action items (for Project 3)**
 - Don't stack PRs. If we must, retarget each PR to `main` after the one below
@@ -107,4 +119,5 @@ show something, the cell says so.
   reconstructing them.
 - Plan AI IDE quota at the start of the project, so the primary harness
   doesn't run out mid-story.
-- _(Brandy to add)_
+- Start building in the first week: get one small feature working end to
+  end early, and set our own internal deadlines ahead of the real ones.
