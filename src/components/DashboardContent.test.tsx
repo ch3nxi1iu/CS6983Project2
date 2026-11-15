@@ -71,7 +71,7 @@ afterAll(async () => {
 });
 
 describe("dashboard content", () => {
-  test("shows the overloaded-week forecast for the next 4 weeks", async () => {
+  test("shows the workload forecast for the next 4 weeks", async () => {
     const userId = await signIn();
     await setStudyHours(userId);
     await createAssignment(userId, {
@@ -85,7 +85,7 @@ describe("dashboard content", () => {
 
     const forecast = screen.getByRole("region", { name: "Forecast" });
     expect(within(forecast).getAllByRole("button", { name: /^Week of/ })).toHaveLength(4);
-    expect(within(forecast).getAllByText("Overloaded week").length).toBeGreaterThan(0);
+    expect(within(forecast).getAllByText("More work than time").length).toBeGreaterThan(0);
   });
 
   test("lists today's work sessions with a link to the full plan", async () => {
