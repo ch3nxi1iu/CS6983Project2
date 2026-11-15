@@ -12,6 +12,7 @@ erDiagram
   Course ||--o{ Assignment : "contains"
   Assignment ||--o{ WorkSession : "is planned as"
   User ||--o{ WorkSession : "owns"
+  User ||--o{ ApiKey : "creates"
 
   User {
     string id PK
@@ -56,6 +57,7 @@ erDiagram
     datetime dueAt
     float points "nullable"
     float estimatedHours
+    AssignmentKind kind "HOMEWORK, PROJECT, EXAM, READING, OTHER; default OTHER"
     boolean submitted "default false"
     datetime createdAt
     datetime updatedAt
@@ -70,14 +72,30 @@ erDiagram
     datetime createdAt
     datetime updatedAt
   }
+  ApiKey {
+    string id PK
+    string userId FK
+    string name
+    string prefix "first 11 characters, shown in the UI"
+    string keyHash UK "HMAC-SHA256 of the key"
+    datetime createdAt
+    datetime lastUsedAt "nullable"
+    datetime revokedAt "nullable"
+  }
 ```
 
 Rules the diagram can't show:
 - **Unique together:** one `UnavailableDate` per user per date, and one
   `Course` per user per course code.
-- **Deletes cascade:** deleting a user deletes all their rows; deleting a
-  course deletes its assignments and their work sessions.
+- **Deletes cascade:** deleting a user deletes all their rows (including API
+  keys); deleting a course deletes its assignments and their work sessions.
 - **Indexes:** `Assignment(courseId, dueAt)` and `WorkSession(userId, startAt)`,
-  for the forecast's and the work plan's main lookups.
+  for the forecast's and the work plan's main lookups; `ApiKey(userId)` for
+  the keys page.
+- **API keys are never stored in plain text:** only an HMAC-SHA256 of the key,
+  keyed with `AUTH_SECRET`, plus a short display prefix. A revoked key keeps
+  its row with `revokedAt` set. Changing `AUTH_SECRET` invalidates every key.
+- **Assignment kind** sets the default estimate when `estimatedHours` isn't
+  known (see `DEFAULT_HOURS_BY_KIND` in `src/lib/planner/work-plan.ts`).
 - **Units:** all times are UTC; all durations are hours. `UnavailableDate.date`
   is a date with no time.
