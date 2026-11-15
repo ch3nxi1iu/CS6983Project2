@@ -41,23 +41,23 @@ describe("WeekForecast", () => {
     expect(screen.getAllByRole("button", { name: /^Week of/ })).toHaveLength(4);
   });
 
-  test("labels weeks with more work than time in text, not only color", () => {
+  test("labels overloaded weeks in text, not only color", () => {
     render(<WeekForecast weeks={weeks} />);
-    expect(screen.getByRole("button", { name: /Week of Nov 23/ }).textContent).toMatch(/More work than time/);
-    expect(screen.getByRole("button", { name: /Week of Nov 16/ }).textContent).not.toMatch(/More work than time/);
-    expect(screen.getByText("1 week with more work than time")).toBeDefined();
+    expect(screen.getByRole("button", { name: /Week of Nov 23/ }).textContent).toMatch(/Overloaded week/);
+    expect(screen.getByRole("button", { name: /Week of Nov 16/ }).textContent).not.toMatch(/Overloaded/);
+    expect(screen.getByText("1 overloaded week ahead")).toBeDefined();
   });
 
   // "Crunch" is an idiom many international students don't know, so the UI
   // uses plain words and says what the label means.
-  test("says what the label means, without the word crunch", () => {
+  test("explains what an overloaded week is, without the word crunch", () => {
     const { container } = render(<WeekForecast weeks={weeks} />);
     expect(
       screen.getByText(
-        "More work than time: the work due that week needs more hours than your study time.",
+        "Overloaded week: the work due that week needs more hours than your study time.",
       ),
     ).toBeDefined();
-    expect(container.textContent).not.toMatch(/crunch|overloaded/i);
+    expect(container.textContent).not.toMatch(/crunch/i);
   });
 
   test("clicking a week lists the assignments behind it", () => {
@@ -86,7 +86,7 @@ describe("WeekForecast", () => {
       assignments: [],
     });
     render(<WeekForecast weeks={empty} />);
-    expect(screen.getByText(/Every week has enough study time for the work due/)).toBeDefined();
+    expect(screen.getByText(/No overloaded weeks ahead/)).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: /Week of Nov 16/ }));
     expect(screen.getByText("Nothing due this week.")).toBeDefined();
   });
