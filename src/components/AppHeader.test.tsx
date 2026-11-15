@@ -92,4 +92,25 @@ describe("AppHeader", () => {
     );
     expect(within(nav).getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
   });
+
+  test("shows the demo banner for a demo account", async () => {
+    const userId = await createTestUser();
+    createdUserIds.push(userId);
+    await prisma.user.update({ where: { id: userId }, data: { isDemo: true } });
+    await createSession(userId);
+
+    await renderHeader();
+
+    expect(screen.getByRole("region", { name: "Demo mode" })).toBeDefined();
+  });
+
+  test("does not show the demo banner for a real account", async () => {
+    const userId = await createTestUser();
+    createdUserIds.push(userId);
+    await createSession(userId);
+
+    await renderHeader();
+
+    expect(screen.queryByRole("region", { name: "Demo mode" })).toBeNull();
+  });
 });
