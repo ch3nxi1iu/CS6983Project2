@@ -70,17 +70,24 @@ Create an account at `/register`, set your study hours on
 
 ```bash
 npm test               # unit and integration tests
+npm run test:coverage  # the same tests, with a coverage report
 ```
 
 Integration tests use the database in `DATABASE_URL`, so run
 `npx prisma migrate deploy` first. Planner, forecast, and availability rules
 are pure functions in `src/lib/planner/` and are tested without a database.
 
+Coverage of `src/lib` and `src/app/api` on 2026-11-14: 94.95% statements,
+89.93% branches, 99.2% functions, 95.55% lines. CI runs
+`npm run test:coverage` on every PR and shows the coverage table on the run's
+summary page; the run fails if line coverage drops below 80%.
+
 | Command | What it does |
 |---|---|
 | `npm run dev` | Start the dev server |
 | `npm test` | Run all tests once |
 | `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run all tests once and report coverage of `src/lib` and `src/app/api` |
 | `npm run lint` | Lint with ESLint |
 | `npm run typecheck` | Generate Next.js route types and type-check |
 | `npm run build` | Production build |
