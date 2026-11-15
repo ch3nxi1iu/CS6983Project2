@@ -14,10 +14,10 @@ import {
 // Reads and writes a user's availability (US-06, #12). Every query filters by
 // userId so one user can never read or change another user's rows.
 //
-// The forecast (#11) and work plan (#13) read availability fresh on every
-// request, so a change here is picked up the next time they are calculated.
-// TODO(#13): if the plan is stored, re-plan after saveWeeklyHours and the
-// unavailable-date changes below.
+// The forecast (#11) reads availability fresh on every request. The work plan
+// (#13) is stored, so the availability routes rebuild it after each change
+// here (#45). That's done in the routes, not here, because work-plan.ts
+// already imports this file.
 
 export type UnavailableDateItem = { id: string; date: string; reason: string | null };
 

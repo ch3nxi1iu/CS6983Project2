@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { removeUnavailableDate } from "@/lib/availability";
+import { regeneratePlanForUser } from "@/lib/work-plan";
 import {
   errorResponse,
   getApiUserId,
@@ -20,5 +21,8 @@ export async function DELETE(
   if (!removed) {
     return errorResponse({ code: "NOT_FOUND", message: "That unavailable date was not found." });
   }
+  // Rebuild the stored plan with the new availability (#45). Before the user
+  // has saved their hours there is no plan yet, and this does nothing.
+  await regeneratePlanForUser(userId, new Date());
   return new NextResponse(null, { status: 204 });
 }
