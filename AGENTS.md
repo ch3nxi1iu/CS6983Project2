@@ -30,6 +30,7 @@ request, point out the conflict instead of silently breaking the rule.
 | Styling | Tailwind CSS (CSS-first config in `globals.css`, no `tailwind.config.js`) | 4.3 |
 | Database | PostgreSQL via Prisma ORM, `pg` driver adapter; local dev DB with `npx prisma dev` | Prisma 7.10.1 |
 | Unit / component tests | Vitest + React Testing Library, jsdom | Vitest 5.0, RTL 16.3 |
+| Test coverage | `@vitest/coverage-v8` (`npm run test:coverage`) | 5.0.5 |
 | E2E tests | Playwright (`@playwright/test`, Chromium; `npm run test:e2e`) | 1.65.1 |
 | Lint | ESLint 9 with `eslint-config-next` | 9.39 |
 | Auth | JWT in an httpOnly cookie (jose), passwords hashed with bcryptjs | jose 6.2.17, bcryptjs 3.0.3 |
