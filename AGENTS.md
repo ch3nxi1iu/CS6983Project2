@@ -402,8 +402,13 @@ Move the issue's card as work progresses:
 - Use semantic HTML: real `<button>`, `<a>`, `<label>` and headings in order.
   Every input has a visible label or an `aria-label`.
 - Everything works with the keyboard alone, with a visible focus outline.
-- **Never use color alone** to show meaning. Crunch weeks, at-risk work, missed
+- **Never use color alone** to show meaning. Overloaded weeks, at-risk work, missed
   and moved sessions also get a text label, tag or pattern (as the mockup does).
+- **Use plain words** that students who learned English as a second language
+  know; no idioms or slang in the UI. A week where the work due needs more
+  hours than the user's study time is an **overloaded week**, never a "crunch
+  week", and the UI says what that means. The code and API keep the name
+  `isCrunch`.
 - Text and controls meet AA contrast in both light and dark mode.
 - Charts have a text alternative (an `aria-label` summary or a table of the
   same numbers).

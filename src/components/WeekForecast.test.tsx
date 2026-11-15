@@ -41,11 +41,23 @@ describe("WeekForecast", () => {
     expect(screen.getAllByRole("button", { name: /^Week of/ })).toHaveLength(4);
   });
 
-  test("labels crunch weeks in text, not only color", () => {
+  test("labels overloaded weeks in text, not only color", () => {
     render(<WeekForecast weeks={weeks} />);
-    expect(screen.getByRole("button", { name: /Week of Nov 23/ }).textContent).toMatch(/Crunch week/);
-    expect(screen.getByRole("button", { name: /Week of Nov 16/ }).textContent).not.toMatch(/Crunch/);
-    expect(screen.getByText("1 crunch week ahead")).toBeDefined();
+    expect(screen.getByRole("button", { name: /Week of Nov 23/ }).textContent).toMatch(/Overloaded week/);
+    expect(screen.getByRole("button", { name: /Week of Nov 16/ }).textContent).not.toMatch(/Overloaded/);
+    expect(screen.getByText("1 overloaded week ahead")).toBeDefined();
+  });
+
+  // "Crunch" is an idiom many international students don't know, so the UI
+  // uses plain words and says what the label means.
+  test("explains what an overloaded week is, without the word crunch", () => {
+    const { container } = render(<WeekForecast weeks={weeks} />);
+    expect(
+      screen.getByText(
+        "Overloaded week: the work due that week needs more hours than your study time.",
+      ),
+    ).toBeDefined();
+    expect(container.textContent).not.toMatch(/crunch/i);
   });
 
   test("clicking a week lists the assignments behind it", () => {
@@ -74,7 +86,7 @@ describe("WeekForecast", () => {
       assignments: [],
     });
     render(<WeekForecast weeks={empty} />);
-    expect(screen.getByText(/No crunch weeks ahead/)).toBeDefined();
+    expect(screen.getByText(/No overloaded weeks ahead/)).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: /Week of Nov 16/ }));
     expect(screen.getByText("Nothing due this week.")).toBeDefined();
   });

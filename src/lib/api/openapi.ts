@@ -339,7 +339,11 @@ export const openApiSpec: OpenApiDocument = {
           weekStart: { type: "string", format: "date", description: "The Monday of the week, YYYY-MM-DD." },
           workHours: { type: "number" },
           availableHours: { type: "number" },
-          isCrunch: { type: "boolean", description: "True when work hours exceed study hours." },
+          isCrunch: {
+            type: "boolean",
+            description:
+              "True when the work due that week needs more hours than the user's study time. The app shows this as an \"overloaded week\".",
+          },
           byCourse: {
             type: "array",
             items: {

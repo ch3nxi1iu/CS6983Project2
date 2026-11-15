@@ -28,9 +28,14 @@ function hours(value: number) {
   return `${Math.round(value * 10) / 10}h`;
 }
 
+// The UI says "Overloaded week", not "crunch week": "crunch" is an idiom many
+// international students don't know. The data still calls it isCrunch.
+const CRUNCH_LABEL = "Overloaded week";
+const CRUNCH_DEFINITION = `${CRUNCH_LABEL}: the work due that week needs more hours than your study time.`;
+
 function crunchSummary(count: number) {
-  if (count === 0) return "No crunch weeks ahead. Your study hours cover the work in every week.";
-  return `${count} crunch ${count === 1 ? "week" : "weeks"} ahead`;
+  if (count === 0) return "No overloaded weeks ahead. Your study time covers the work due in every week.";
+  return `${count} overloaded ${count === 1 ? "week" : "weeks"} ahead`;
 }
 
 export default function WeekForecast({ weeks }: Props) {
@@ -54,9 +59,12 @@ export default function WeekForecast({ weeks }: Props) {
 
   return (
     <div className="space-y-6 text-ink">
-      <p className={crunchCount > 0 ? "font-semibold text-line" : "text-ink-2"}>
-        {crunchSummary(crunchCount)}
-      </p>
+      <div className="space-y-1">
+        <p className={crunchCount > 0 ? "font-semibold text-line" : "text-ink-2"}>
+          {crunchSummary(crunchCount)}
+        </p>
+        {crunchCount > 0 && <p className="text-sm text-ink-2">{CRUNCH_DEFINITION}</p>}
+      </div>
 
       <ul className="space-y-3" aria-label="Hours of work per week">
         {weeks.map((item) => {
@@ -81,7 +89,7 @@ export default function WeekForecast({ weeks }: Props) {
                   </span>
                   {item.isCrunch && (
                     <span className="rounded bg-line px-2 text-xs font-bold text-surface">
-                      Crunch week
+                      {CRUNCH_LABEL}
                     </span>
                   )}
                 </span>
