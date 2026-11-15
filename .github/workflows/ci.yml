@@ -59,7 +59,18 @@ jobs:
       - run: npm ci
       - name: Apply database migrations
         run: npx prisma migrate deploy
-      - run: npm test
+      - run: npm run test:coverage
+      # Show coverage of src/lib and src/app/api on the run's summary page (#47).
+      - name: Add coverage to the job summary
+        if: ${{ !cancelled() && hashFiles('coverage/coverage-summary.json') != '' }}
+        run: |
+          node -e '
+            const total = require("./coverage/coverage-summary.json").total;
+            const rows = ["statements", "branches", "functions", "lines"].map(
+              (key) => `| ${key} | ${total[key].pct}% | ${total[key].covered} / ${total[key].total} |`,
+            );
+            console.log(["### Test coverage (src/lib and src/app/api)", "", "| Metric | Covered | Count |", "|---|---|---|", ...rows].join("\n"));
+          ' >> "$GITHUB_STEP_SUMMARY"
 
   build:
     name: Build
