@@ -12,8 +12,8 @@ flowchart LR
 
   subgraph vercel["Vercel: Next.js 16 app"]
     proxy["proxy.ts<br/>checks the session cookie"]
-    pages["Pages<br/>Server Components by default<br/>/login · /register · /dashboard · /settings · /plan<br/>/docs/api (Swagger UI)"]
-    api["API routes<br/>app: /api/auth/* · /api/plan · /api/assignments<br/>/api/availability · /api/unavailable-dates · /api/api-keys<br/>public: /api/tasks · /api/plan/today · /api/workload<br/>/api/work-sessions/{id}/complete · /openapi.json"]
+    pages["Pages<br/>Server Components by default<br/>/ (landing) · /login · /register · /dashboard · /settings · /plan<br/>/docs/api (Swagger UI)"]
+    api["API routes<br/>app: /api/auth/* (incl. /api/auth/demo) · /api/demo/reset<br/>/api/plan · /api/assignments<br/>/api/availability · /api/unavailable-dates · /api/api-keys<br/>public: /api/tasks · /api/plan/today · /api/workload<br/>/api/work-sessions/{id}/complete · /openapi.json"]
     lib["src/lib<br/>auth · planner (pure functions)<br/>availability · work plan · forecast<br/>api keys · rate limit · demo"]
     db["Prisma client<br/>src/lib/db.ts"]
   end
@@ -55,6 +55,10 @@ flowchart LR
   `src/lib/planner/` as pure functions, so they're tested without a database.
 - **Database:** every query goes through the one Prisma client in
   `src/lib/db.ts`. See [database.md](database.md) for the tables.
+- **Demo mode:** "Try the demo" calls `POST /api/auth/demo`, which creates a
+  fresh demo account (`isDemo`) with sample data, builds its plan, and signs
+  the visitor in. `POST /api/demo/reset` restores the sample data and answers
+  403 for accounts that aren't demo accounts.
 - **Canvas (planned):** all Canvas calls will go through `src/lib/canvas/`.
   Until then, demo mode supplies sample courses and assignments.
 - **Real-time (planned):** live group progress would add a WebSocket channel.
