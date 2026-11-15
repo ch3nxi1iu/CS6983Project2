@@ -19,9 +19,12 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Protect API routes: any /api route except /api/auth/* returns 401 without valid session
+  // Protect API routes: any /api route except /api/auth/* returns 401 without a valid
+  // session. A request with an "Authorization: Bearer" header goes to the route, which
+  // checks the personal API key itself (#18).
+  const hasBearerToken = /^Bearer\s+\S/i.test(request.headers.get("authorization") ?? "");
   if (pathname.startsWith("/api") && !pathname.startsWith("/api/auth")) {
-    if (!session) {
+    if (!session && !hasBearerToken) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication required." } },
         { status: 401 },

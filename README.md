@@ -31,6 +31,24 @@ URL it prints into `.env`.
 | `npm run build` | Production build |
 | `npm run vercel-build` | What Vercel runs: migrations (production only), then the build |
 
+## Public API
+
+Your tasks, today's plan, weekly workload and work sessions are also available to
+your own scripts.
+
+- Interactive docs: [`/docs/api`](http://localhost:3000/docs/api)
+- OpenAPI spec: [`/openapi.json`](http://localhost:3000/openapi.json)
+
+Create a key in **Settings > API keys**. Send it in the `Authorization` header with
+the `Bearer` scheme:
+
+```bash
+curl -H "Authorization: Bearer ll_your_key" http://localhost:3000/api/tasks
+```
+
+A key is shown once and stored only as a hash. Revoke it at any time. Each key can
+make 60 requests a minute.
+
 ## Deployment
 
 The app is hosted on [Vercel](https://vercel.com) with a [Neon](https://neon.tech)
