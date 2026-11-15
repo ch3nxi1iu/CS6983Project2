@@ -1,8 +1,10 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
-// Reuse one client across hot reloads in development so we don't open a new
-// connection pool every time a file changes.
+// Reuse one client per server process. In development this survives hot
+// reloads; in a production build it stops each bundle that includes this
+// module (the proxy and the routes) from opening its own connection pool,
+// which went over the local `prisma dev` limit of 10 connections.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient() {
@@ -12,6 +14,4 @@ function createPrismaClient() {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+globalForPrisma.prisma = prisma;
