@@ -29,14 +29,15 @@ We didn't keep written standups during this sprint; we coordinated by
 message and on pull requests. The entries below were written afterwards
 (Nov 14) from the commit, PR and board history, and each of us checked our
 own. Where the record doesn't show a plan or a blocker, the cell says so.
+The Oct 30 entries also use our Slack messages from that day.
 
 | Date | Who | Done | Next | Blockers |
 |---|---|---|---|---|
 | Oct 23 | Chenxi | Created the repo, labels and project board; invited Brandy | Turn the PRD into issues | Waiting for Brandy to accept the repo invite |
 | Oct 29 | Chenxi | Scaffolded the app; created Sprint 1 and 2 milestones and 24 issues from the PRD; wrote `AGENTS.md` part A | Finish the rules file and run the HW3 test | Issues not assigned yet |
 | Oct 29 | Brandy | Accepted the repo invite | Mockup and `AGENTS.md` part B | Not recorded |
-| Oct 30 | Chenxi | Opened #25 (rules part A) and #28 (PRD); ran the HW3 before/after test in Antigravity | Rules v3 from the test results | Not recorded |
-| Oct 30 | Brandy | Added the Loadline UI mockup (#26) and wrote `AGENTS.md` part B, the PRD and design references, do's and don'ts (#27); approved Chenxi's part A (#25) | _(Brandy to fill)_ | _(Brandy to fill)_ |
+| Oct 30 | Chenxi | Opened #25 (rules part A) and #28 (PRD); reviewed Brandy's mockup on Slack: it covers all six proposal stories with desktop and mobile views and settles the name Loadline, but has no weekly-availability screen for US-06 (#12) and shows a calendar sync that no story covers; ran the HW3 before/after test in Antigravity | Rules v3 from the test results | The mockup didn't match US-06, the story the HW3 test uses; asked Brandy to add a Settings → Availability screen and say in `AGENTS.md` that calendar sync isn't planned |
+| Oct 30 | Brandy | Added the Loadline UI mockup (#26) and wrote `AGENTS.md` part B, the PRD and design references, do's and don'ts (#27); approved Chenxi's part A (#25) | Agreed on Slack (✅) to add a Settings → Availability screen for US-06 to the mockup, and to cover three points in `AGENTS.md` part B: real data goes in the database, not the mockup's local storage; list the details that exist only in the mockup (12-hour daily limit, half-hour steps, default hours); the PRD is the source of truth for acceptance criteria | _(Brandy to fill)_ |
 | _(date)_ | Brandy | _(Brandy to add any other Sprint 1 standups she posted elsewhere, with their real dates)_ | | |
 
 ## Retrospective
@@ -49,6 +50,9 @@ own. Where the record doesn't show a plan or a blocker, the cell says so.
   for the better (cleaner UI, our design tokens), and its findings went
   straight into rules v3.
 - The mockup gave a concrete design target, which later pages followed.
+- Reviewing the mockup against the PRD before the HW3 test caught two
+  problems early: no screen for US-06, and a calendar-sync design that no
+  story covers. Both were fixed the same day.
 - The board and the 24 issues came straight from the PRD's user stories.
 
 **What didn't go well**
