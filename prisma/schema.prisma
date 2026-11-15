@@ -30,8 +30,8 @@ model User {
   apiKeys          ApiKey[]
 }
 
-// A personal key for the public API (#18). Only the SHA-256 hash of the key is
-// stored; the prefix is kept so the UI can show which key is which.
+// A personal key for the public API (#18). Only an HMAC-SHA256 of the key (keyed
+// with AUTH_SECRET) is stored; the prefix is kept so the UI can show which key is which.
 model ApiKey {
   id         String    @id @default(cuid())
   userId     String

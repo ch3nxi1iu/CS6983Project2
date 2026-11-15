@@ -1,8 +1,10 @@
 // Personal API keys for the public API (US-12, #18).
-// A key is "ll_" plus 32 random bytes in base64url. Only its SHA-256 hash is
-// stored, so the plaintext can be shown once and never read back. Every query
-// filters by userId so one user can never see or revoke another user's keys.
-import { createHash, randomBytes } from "crypto";
+// A key is "ll_" plus 32 random bytes in base64url. Only an HMAC-SHA256 of it,
+// keyed with the server's AUTH_SECRET, is stored, so the plaintext can be shown
+// once and never read back, and a copy of the database alone can't check a
+// guessed key. Every query filters by userId so one user can never see or
+// revoke another user's keys.
+import { createHmac, randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
 import type { Result } from "@/lib/planner/availability";
 
@@ -30,9 +32,22 @@ const viewSelect = {
   revokedAt: true,
 } as const;
 
-/** SHA-256 of the plaintext key, hex encoded. This is what the database stores. */
+/** The server secret keys are hashed with; required outside tests, like the session secret. */
+function apiKeyHashSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "test") return "test-api-key-hash-secret";
+  throw new Error("AUTH_SECRET environment variable is required.");
+}
+
+/**
+ * HMAC-SHA256 of the plaintext key with the server secret, hex encoded. This is
+ * what the database stores. Keys are 32 random bytes, so a fast keyed hash is
+ * enough; slow password hashing is for low-entropy, human-chosen passwords.
+ * Changing AUTH_SECRET invalidates every API key.
+ */
 export function hashApiKey(key: string): string {
-  return createHash("sha256").update(key).digest("hex");
+  return createHmac("sha256", apiKeyHashSecret()).update(key).digest("hex");
 }
 
 /** Checks the name a user typed for a new key: trimmed, 1 to 60 characters. */
