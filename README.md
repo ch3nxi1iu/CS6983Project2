@@ -1,8 +1,8 @@
 # Loadline
 
-Loadline turns course deadlines into a calm plan. It shows which weeks are
-going to be crunch weeks, and splits each assignment into daily work sessions
-that fit the study hours you say you have.
+Loadline turns course deadlines into a calm plan. It shows which weeks will
+be overloaded (more work due than you have study time for), and splits each
+assignment into daily work sessions that fit the study hours you set.
 
 **Live app:** https://loadline-cs6983-loadline1.vercel.app
 
@@ -17,7 +17,7 @@ Prisma 7 · Vitest + Testing Library · Vercel + Neon.
 | Feature | Story | Where |
 |---|---|---|
 | Sign up and sign in; the session is a JWT in an httpOnly cookie | [US-01](https://github.com/ch3nxi1iu/CS6983Project2/issues/7) | `/register`, `/login` |
-| Crunch-week forecast: how heavy each coming week is against your study hours | [US-05](https://github.com/ch3nxi1iu/CS6983Project2/issues/11) | `GET /api/workload` |
+| Workload forecast: for each of the next 4 weeks, the hours of work due against your study time; weeks with more work than time are marked **Overloaded week** | [US-05](https://github.com/ch3nxi1iu/CS6983Project2/issues/11) | `GET /api/workload` |
 | Weekly study hours and days off; changing them re-plans | [US-06](https://github.com/ch3nxi1iu/CS6983Project2/issues/12) | `/settings/availability` |
 | Work plan: each assignment split into sessions before its due date, with at-risk warnings | [US-07](https://github.com/ch3nxi1iu/CS6983Project2/issues/13) | `/plan` |
 | Public REST API with personal API keys and interactive docs | [US-12](https://github.com/ch3nxi1iu/CS6983Project2/issues/18) | `/docs/api`, `/settings/api` |
