@@ -2,11 +2,10 @@
 // Route tests for /api/api-keys (US-12, #18). Key management uses the session
 // cookie only, so these tests check that a Bearer API key is refused here.
 import "dotenv/config";
-import { createHash } from "node:crypto";
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
-import { createApiKey } from "@/lib/api-keys";
+import { createApiKey, hashApiKey } from "@/lib/api-keys";
 import { createTestUser, deleteTestUsers } from "@/test/work-plan-fixtures";
 
 const cookieJar = new Map<string, { value: string; [key: string]: unknown }>();
@@ -111,7 +110,7 @@ describe("POST /api/api-keys", () => {
 
     const row = await prisma.apiKey.findUniqueOrThrow({ where: { id: body.apiKey.id } });
     expect(row.userId).toBe(userId);
-    expect(row.keyHash).toBe(createHash("sha256").update(body.key).digest("hex"));
+    expect(row.keyHash).toBe(hashApiKey(body.key));
   });
 
   test.each([

@@ -2,12 +2,12 @@
 // Integration tests for src/lib/api-keys.ts (US-12, #18). They run against the
 // real database; each test file deletes its own users in afterAll.
 import "dotenv/config";
-import { createHash } from "node:crypto";
 import { afterAll, describe, expect, test } from "vitest";
 import { prisma } from "@/lib/db";
 import {
   createApiKey,
   findUserIdByApiKey,
+  hashApiKey,
   listApiKeys,
   revokeApiKey,
   validateApiKeyName,
@@ -40,14 +40,29 @@ describe("createApiKey", () => {
     expect(apiKey.lastUsedAt).toBeNull();
   });
 
-  test("stores only the SHA-256 hash and the prefix, never the plaintext key", async () => {
+  test("stores only a keyed hash and the prefix, never the plaintext key", async () => {
     const userId = await newUser();
     const { key, apiKey } = await createApiKey(userId, "Hashed");
 
     const row = await prisma.apiKey.findUniqueOrThrow({ where: { id: apiKey.id } });
-    expect(row.keyHash).toBe(createHash("sha256").update(key).digest("hex"));
+    expect(row.keyHash).toBe(hashApiKey(key));
+    expect(row.keyHash).toMatch(/^[0-9a-f]{64}$/);
     expect(row.prefix).toBe(key.slice(0, 11));
     expect(JSON.stringify(row)).not.toContain(key);
+  });
+
+  test("hashes keys with the server secret, so the database alone can't check a key", () => {
+    const original = process.env.AUTH_SECRET;
+    try {
+      const key = "ll_" + "a".repeat(43);
+      process.env.AUTH_SECRET = "first-secret-for-this-test-0123456789";
+      const first = hashApiKey(key);
+      process.env.AUTH_SECRET = "second-secret-for-this-test-0123456789";
+      const second = hashApiKey(key);
+      expect(first).not.toBe(second);
+    } finally {
+      process.env.AUTH_SECRET = original;
+    }
   });
 
   test("generates a different key each time", async () => {
