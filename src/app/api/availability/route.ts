@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAvailabilitySettings, saveWeeklyHours } from "@/lib/availability";
+import { regeneratePlanForUser } from "@/lib/work-plan";
 import { errorResponse, getApiUserId, unauthorizedResponse } from "@/lib/api/route-helpers";
 
 // Weekly study hours for the signed-in user (US-06, #12).
@@ -18,5 +19,8 @@ export async function PUT(request: Request) {
   const body: unknown = await request.json().catch(() => undefined);
   const result = await saveWeeklyHours(userId, body);
   if (!result.ok) return errorResponse(result.error);
+  // Rebuild the stored plan with the new availability (#45). Before the user
+  // has saved their hours there is no plan yet, and this does nothing.
+  await regeneratePlanForUser(userId, new Date());
   return NextResponse.json({ weeklyHours: result.value });
 }
