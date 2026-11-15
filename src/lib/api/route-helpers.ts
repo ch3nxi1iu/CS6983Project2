@@ -5,13 +5,17 @@ import type { ApiErrorCode } from "@/lib/planner/availability";
 
 // Shared by the API route handlers (AGENTS.md: one error shape, matching status).
 
-export type ApiError = { code: ApiErrorCode | "UNAUTHORIZED"; message: string };
+export type ApiError = {
+  code: ApiErrorCode | "UNAUTHORIZED" | "INTERNAL_ERROR";
+  message: string;
+};
 
 const STATUS_BY_CODE: Record<ApiError["code"], number> = {
   VALIDATION_ERROR: 400,
   UNAUTHORIZED: 401,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  INTERNAL_ERROR: 500,
 };
 
 export function errorResponse(error: ApiError): NextResponse {
@@ -23,6 +27,19 @@ export function errorResponse(error: ApiError): NextResponse {
 
 export function unauthorizedResponse(): NextResponse {
   return errorResponse({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+}
+
+/**
+ * For errors the route didn't expect (database down, missing secret). Logs the
+ * real error on the server and sends the client a generic message, so internal
+ * details never reach the response.
+ */
+export function internalErrorResponse(context: string, error: unknown): NextResponse {
+  console.error(`${context}:`, error);
+  return errorResponse({
+    code: "INTERNAL_ERROR",
+    message: "Something went wrong on our side. Please try again.",
+  });
 }
 
 /**

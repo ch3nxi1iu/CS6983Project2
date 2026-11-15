@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
+import { internalErrorResponse } from "@/lib/api/route-helpers";
 import {
   createSession,
   getSessionCookieOptions,
@@ -39,38 +40,42 @@ export async function POST(request: Request) {
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  const user = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
-  // Run verifyPassword against the real hash if the user exists, or against a fixed
-  // dummy hash if not, so both failure paths take the same amount of time.
-  const hashToVerify = user ? user.passwordHash : DUMMY_HASH;
-  const isPasswordValid = await verifyPassword(password, hashToVerify);
+    // Run verifyPassword against the real hash if the user exists, or against a fixed
+    // dummy hash if not, so both failure paths take the same amount of time.
+    const hashToVerify = user ? user.passwordHash : DUMMY_HASH;
+    const isPasswordValid = await verifyPassword(password, hashToVerify);
 
-  // Never reveal whether the email exists or the password was wrong
-  const CREDENTIALS_ERROR = {
-    error: {
-      code: "UNAUTHORIZED",
-      message: "Email or password is incorrect.",
-    },
-  };
-
-  if (!user || !isPasswordValid) {
-    return NextResponse.json(CREDENTIALS_ERROR, { status: 401 });
-  }
-
-  const token = await createSession(user.id);
-  const response = NextResponse.json(
-    {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
+    // Never reveal whether the email exists or the password was wrong
+    const CREDENTIALS_ERROR = {
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Email or password is incorrect.",
       },
-    },
-    { status: 200 },
-  );
-  response.cookies.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
-  return response;
+    };
+
+    if (!user || !isPasswordValid) {
+      return NextResponse.json(CREDENTIALS_ERROR, { status: 401 });
+    }
+
+    const token = await createSession(user.id);
+    const response = NextResponse.json(
+      {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+      },
+      { status: 200 },
+    );
+    response.cookies.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
+    return response;
+  } catch (error) {
+    return internalErrorResponse("Login failed", error);
+  }
 }

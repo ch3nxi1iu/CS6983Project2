@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
+import { assertSessionSecret } from "@/lib/auth/jwt";
+import { internalErrorResponse } from "@/lib/api/route-helpers";
 import {
   createSession,
   getSessionCookieOptions,
@@ -57,34 +59,42 @@ export async function POST(request: Request) {
     );
   }
 
-  const existing = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-  });
+  try {
+    // Checked before the account is created: if sessions can't be signed, a
+    // created account would be one the user can never sign in to (#46).
+    assertSessionSecret();
 
-  if (existing) {
-    return NextResponse.json(
-      { error: { code: "EMAIL_EXISTS", message: "An account with this email already exists." } },
-      { status: 409 },
-    );
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: { code: "EMAIL_EXISTS", message: "An account with this email already exists." } },
+        { status: 409 },
+      );
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash,
+        name: typeof name === "string" && name.trim() ? name.trim() : null,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    const token = await createSession(user.id);
+    const response = NextResponse.json({ user }, { status: 201 });
+    response.cookies.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
+    return response;
+  } catch (error) {
+    return internalErrorResponse("Registration failed", error);
   }
-
-  const passwordHash = await hashPassword(password);
-
-  const user = await prisma.user.create({
-    data: {
-      email: normalizedEmail,
-      passwordHash,
-      name: typeof name === "string" && name.trim() ? name.trim() : null,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-    },
-  });
-
-  const token = await createSession(user.id);
-  const response = NextResponse.json({ user }, { status: 201 });
-  response.cookies.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
-  return response;
 }
