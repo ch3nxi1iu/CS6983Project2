@@ -149,4 +149,7 @@ Variables), never in the repo. Diagrams of the system and the pipeline are in
 - [Architecture](docs/architecture.md): system and delivery pipeline diagrams
 - [Database schema](docs/database.md): tables, relations, and constraints
 - [AGENTS.md](AGENTS.md): the shared rules file both partners' AI tools follow
+- [Sprint 1](docs/sprints/sprint-1.md) and [Sprint 2](docs/sprints/sprint-2.md): plans, standups, and retrospectives
+- [Contribution log](docs/contributions.md): who did what
+- [AI usage log](docs/ai-usage.md): which AI tool did what, PR by PR
 - [Mockup](docs/mockups/loadline-mockup.html): interactive desktop and mobile mockup; open it in a browser
