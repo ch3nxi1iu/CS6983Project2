@@ -1,6 +1,7 @@
 # Runs on every pull request and on pushes to main. Stages run in order:
 # lint and typecheck → unit and integration tests → build.
-# E2E tests (#6) will be added as a stage after build.
+# End-to-end tests (#6) also start after lint and typecheck, alongside the
+# unit tests; they build the app themselves.
 name: CI
 
 on:
@@ -76,6 +77,48 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  e2e:
+    name: End-to-end tests
+    needs: lint
+    runs-on: ubuntu-latest
+    # Its own throwaway Postgres; Playwright builds and starts the app on port 3100.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: loadline_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loadline_e2e
+      AUTH_SECRET: ci-only-e2e-secret-not-used-anywhere-else-0123456789
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+      - name: Install Playwright's Chromium
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   audit:
     name: Dependency audit
