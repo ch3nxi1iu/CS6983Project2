@@ -1,6 +1,6 @@
 // @vitest-environment node
 import "dotenv/config";
-import { afterAll, describe, expect, test, vi } from "vitest";
+import { afterAll, afterEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { POST as registerHandler } from "@/app/api/auth/register/route";
 import { POST as loginHandler } from "@/app/api/auth/login/route";
@@ -236,5 +236,70 @@ describe("POST /api/auth/logout", () => {
     expect(setCookie).toBeTruthy();
     // Cookie should be deleted or expired in the past
     expect(setCookie).toMatch(/(session=;|Max-Age=0|expires=Thu, 01 Jan 1970)/i);
+  });
+});
+
+// #46: on production a missing AUTH_SECRET crashed sign-up after the account was
+// created, leaving an account nobody could sign in to.
+describe("unexpected server errors in register and login", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  test("register returns 500 and creates no account when sessions can't be signed", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AUTH_SECRET", "");
+    const email = `no-secret-${crypto.randomUUID()}@example.com`;
+
+    const res = await registerHandler(
+      createJsonRequest("http://localhost:3000/api/auth/register", {
+        email,
+        password: "ValidPassword123!",
+      }),
+    );
+
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error.code).toBe("INTERNAL_ERROR");
+    vi.unstubAllEnvs();
+    const dbUser = await prisma.user.findUnique({ where: { email } });
+    if (dbUser) createdUserIds.push(dbUser.id);
+    expect(dbUser).toBeNull();
+  });
+
+  test("register returns 500 in the error shape when the database fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(prisma.user, "findUnique").mockRejectedValueOnce(new Error("connection lost"));
+
+    const res = await registerHandler(
+      createJsonRequest("http://localhost:3000/api/auth/register", {
+        email: `db-down-${crypto.randomUUID()}@example.com`,
+        password: "ValidPassword123!",
+      }),
+    );
+
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error.code).toBe("INTERNAL_ERROR");
+    expect(data.error.message).not.toContain("connection lost");
+  });
+
+  test("login returns 500 in the error shape when the database fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(prisma.user, "findUnique").mockRejectedValueOnce(new Error("connection lost"));
+
+    const res = await loginHandler(
+      createJsonRequest("http://localhost:3000/api/auth/login", {
+        email: `db-down-${crypto.randomUUID()}@example.com`,
+        password: "ValidPassword123!",
+      }),
+    );
+
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error.code).toBe("INTERNAL_ERROR");
+    expect(data.error.message).not.toContain("connection lost");
   });
 });
