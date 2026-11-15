@@ -91,8 +91,8 @@ Integration tests use the database in `DATABASE_URL`, so run
 `npx prisma migrate deploy` first. Planner, forecast, and availability rules
 are pure functions in `src/lib/planner/` and are tested without a database.
 
-Coverage of `src/lib` and `src/app/api` on 2026-11-14: 94.95% statements,
-89.93% branches, 99.2% functions, 95.55% lines. CI runs
+Coverage of `src/lib` and `src/app/api` on 2026-11-14: 94.94% statements,
+90.2% branches, 99.2% functions, 95.54% lines. CI runs
 `npm run test:coverage` on every PR and shows the coverage table on the run's
 summary page; the run fails if line coverage drops below 80%.
 
