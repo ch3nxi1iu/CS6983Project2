@@ -18,6 +18,15 @@ function getSecretKey(): Uint8Array {
 }
 
 /**
+ * Throws when sessions can't be signed (no AUTH_SECRET outside tests). Sign-up
+ * calls this before creating the account, so a missing secret can't leave an
+ * account nobody can sign in to (#46).
+ */
+export function assertSessionSecret(): void {
+  getSecretKey();
+}
+
+/**
  * Signs a JWT containing the user session payload with HS256 and a 7-day expiration.
  */
 export async function signSessionToken(payload: SessionPayload): Promise<string> {
