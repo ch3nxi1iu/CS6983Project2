@@ -48,6 +48,10 @@ has loaded `AGENTS.md`.
 | #52 | #24 | Chenxi | Claude Code | Drafted this log from the PRs, commits, and our notes | Checked each row |
 | #54 | #53 | Chenxi | Claude Code | Wrote failing tests, then replaced "Crunch week" with plain wording and a definition; added the plain-words rule to `AGENTS.md` | Asked for wording international students understand; chose "Overloaded week" |
 | #55 | #24 | Chenxi | Claude Code | Drafted the sprint docs and contribution log from commits, PRs, reviews and our notes; folded in Brandy's own draft and corrected two details in it | Partner feedback and missing standup details written by each partner |
+| #58 | #57 | Chenxi | Claude Code (subagent), Claude Code | Subagent: found the extra connection pools while setting up E2E. Claude Code: confirmed it by running E2E with and without the change, then wrote the failing test and the one-line fix | Reviewed before pushing |
+| #59 | #47 | Chenxi | Claude Code (subagent), Claude Code | Subagent: coverage config, script, CI summary, README numbers. Claude Code: reviewed, rebased, reran coverage, updated the numbers | Approved the dependency with Brandy; reviewed before pushing |
+| #60 | #6 | Chenxi | Claude Code (subagent), Claude Code | Subagent: Playwright config, smoke and first-visit tests, CI job. Claude Code: reviewed, rebased, added the demo-mode test | Approved the dependency (Brandy's OK pending); reviewed before pushing |
+| #61 | #22 | Chenxi | Claude Code | Added screenshots, demo mode and the dashboard to the README, and the demo routes to the architecture diagram | Reviewed before pushing |
 
 ## Prompts
 
