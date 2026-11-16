@@ -105,6 +105,7 @@ describe("dashboard content", () => {
     const list = within(today).getByRole("list", { name: "Today's sessions" });
     expect(within(list).getByText("Problem set 4")).toBeDefined();
     expect(within(list).getByText(/CS 5800/)).toBeDefined();
+    expect(within(list).getAllByRole("button", { name: "Mark done: Problem set 4" }).length).toBeGreaterThan(0);
     expect(
       within(today).getByRole("link", { name: "See the full plan" }).getAttribute("href"),
     ).toBe("/plan");

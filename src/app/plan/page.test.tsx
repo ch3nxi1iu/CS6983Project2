@@ -117,6 +117,10 @@ describe("/plan page content", () => {
     const dayThree = within(dayLists[2]);
     expect(dayThree.getByText("Missed")).toBeDefined();
     expect(dayThree.getByText("1h")).toBeDefined();
+
+    // Only work still to do can be marked done.
+    expect(today.getByRole("button", { name: "Mark done: Homework 3" })).toBeDefined();
+    expect(dayThree.queryByRole("button", { name: /^Mark done/ })).toBeNull();
   });
 
   test("lists assignments that cannot fit under At risk, with the hours short", async () => {

@@ -140,9 +140,50 @@ describe("regeneratePlanForUser", () => {
 
     // The old SCHEDULED session is gone, not just shadowed by new rows.
     expect(await prisma.workSession.findUnique({ where: { id: oldScheduled.id } })).toBeNull();
-    // What remains as SCHEDULED is exactly the new plan for the 2h assignment.
+    // The 1h already done counts, so only the remaining 1h of the 2h
+    // assignment is scheduled again (#14).
     const scheduled = all.filter((s) => s.status === "SCHEDULED");
-    expect(scheduled.reduce((sum, s) => sum + s.hours, 0)).toBe(2);
+    expect(scheduled.reduce((sum, s) => sum + s.hours, 0)).toBe(1);
+  });
+
+  test("schedules only the hours not done yet, so marking work done isn't undone by a rebuild", async () => {
+    await setAvailability(userId);
+    const { assignment } = await createCourseWithAssignment(
+      userId,
+      new Date("2026-11-21T23:59:00Z"),
+      6,
+    );
+    const first = await regeneratePlanForUser(userId, NOW);
+    if (!first.ok) throw new Error(first.message);
+    const doneSession = first.sessions[0];
+    await prisma.workSession.update({ where: { id: doneSession.id }, data: { status: "DONE" } });
+
+    await regeneratePlanForUser(userId, NOW);
+
+    const rows = await prisma.workSession.findMany({ where: { userId, assignmentId: assignment.id } });
+    const scheduledHours = rows
+      .filter((s) => s.status === "SCHEDULED")
+      .reduce((sum, s) => sum + s.hours, 0);
+    expect(scheduledHours).toBe(6 - doneSession.hours);
+    expect(rows.find((s) => s.id === doneSession.id)?.status).toBe("DONE");
+  });
+
+  test("schedules nothing more for an assignment whose hours are all done", async () => {
+    await setAvailability(userId);
+    const { assignment } = await createCourseWithAssignment(
+      userId,
+      new Date("2026-11-21T23:59:00Z"),
+      2,
+    );
+    await prisma.workSession.create({
+      data: { userId, assignmentId: assignment.id, startAt: new Date("2026-11-15T00:00:00Z"), hours: 2, status: "DONE" },
+    });
+
+    const plan = await regeneratePlanForUser(userId, NOW);
+
+    if (!plan.ok) throw new Error(plan.message);
+    expect(plan.sessions.filter((s) => s.assignmentId === assignment.id)).toEqual([]);
+    expect(plan.atRisk).toEqual([]);
   });
 
   test("respects unavailable dates set by the user", async () => {
