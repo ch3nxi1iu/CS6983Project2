@@ -6,7 +6,7 @@ import "dotenv/config";
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
-import { addDays, toDateKey } from "@/lib/planner/availability";
+import { addDays } from "@/lib/planner/availability";
 import {
   NO_STUDY_HOURS,
   createAssignment,
@@ -15,6 +15,7 @@ import {
   dueInDays,
   setStudyHours,
   startOfDayInDays,
+  todayKey,
 } from "@/test/work-plan-fixtures";
 
 const cookieJar = new Map<string, { value: string; [key: string]: unknown }>();
@@ -99,10 +100,10 @@ describe("GET /api/plan", () => {
       assignmentId: assignment.id,
       assignmentTitle: "Homework 3",
       courseCode: "CS 6120",
-      date: toDateKey(new Date()),
+      date: todayKey(),
       hours: 1,
     });
-    expect(body.sessions[2].date).toBe(addDays(toDateKey(new Date()), 6));
+    expect(body.sessions[2].date).toBe(addDays(todayKey(), 6));
   });
 
   test("does not return another user's sessions", async () => {

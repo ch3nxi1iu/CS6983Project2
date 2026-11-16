@@ -7,7 +7,6 @@ import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
 import { createApiKey } from "@/lib/api-keys";
-import { toDateKey } from "@/lib/planner/availability";
 import {
   NO_STUDY_HOURS,
   createAssignment,
@@ -16,6 +15,7 @@ import {
   dueInDays,
   setStudyHours,
   startOfDayInDays,
+  todayKey,
 } from "@/test/work-plan-fixtures";
 
 const cookieJar = new Map<string, { value: string; [key: string]: unknown }>();
@@ -92,7 +92,7 @@ describe("GET /api/plan/today", () => {
     const res = await getToday();
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.date).toBe(toDateKey(new Date()));
+    expect(body.date).toBe(todayKey());
     expect(body.sessions).toHaveLength(2);
     expect(body.sessions.map((s: { status: string }) => s.status).sort()).toEqual([
       "DONE",
@@ -102,7 +102,7 @@ describe("GET /api/plan/today", () => {
       assignmentId: assignment.id,
       assignmentTitle: "Homework 3",
       courseCode: "CS 6120",
-      date: toDateKey(new Date()),
+      date: todayKey(),
     });
     expect(body.sessions[0]).toHaveProperty("id");
     expect(body.sessions[0]).toHaveProperty("hours");
