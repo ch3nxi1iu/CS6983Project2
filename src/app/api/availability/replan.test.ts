@@ -15,6 +15,8 @@ import {
 import { PUT } from "@/app/api/availability/route";
 import { POST } from "@/app/api/unavailable-dates/route";
 import { DELETE } from "@/app/api/unavailable-dates/[id]/route";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 
 // US-06 (#45): changing study hours or unavailable dates rebuilds the stored
 // work plan, through the real routes.
@@ -52,7 +54,7 @@ afterAll(async () => {
 });
 
 function todayKey(): string {
-  return toDateKey(new Date());
+  return toLocalDateKey(new Date(), APP_TIME_ZONE);
 }
 
 /**

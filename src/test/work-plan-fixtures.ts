@@ -2,7 +2,9 @@
 // Each test file creates its own users and deletes them in afterAll. Deleting
 // a user cascades to their courses, assignments and work sessions.
 import { prisma } from "@/lib/db";
-import { addDays, toDateKey, type WeeklyHours } from "@/lib/planner/availability";
+import { addDays, type WeeklyHours } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 
 export const STUDY_4H_EVERY_DAY: WeeklyHours = {
   monday: 4,
@@ -24,14 +26,19 @@ export const NO_STUDY_HOURS: WeeklyHours = {
   sunday: 0,
 };
 
+/** Today in the app's time zone, as the app computes it. */
+export function todayKey(): string {
+  return toLocalDateKey(new Date(), APP_TIME_ZONE);
+}
+
 /** 23:59 UTC on the day `days` after today. */
 export function dueInDays(days: number): Date {
-  return new Date(`${addDays(toDateKey(new Date()), days)}T23:59:00Z`);
+  return new Date(`${addDays(todayKey(), days)}T23:59:00Z`);
 }
 
 /** Midnight UTC on the day `days` after today, the way sessions are stored. */
 export function startOfDayInDays(days: number): Date {
-  return new Date(`${addDays(toDateKey(new Date()), days)}T00:00:00Z`);
+  return new Date(`${addDays(todayKey(), days)}T00:00:00Z`);
 }
 
 export async function createTestUser(): Promise<string> {

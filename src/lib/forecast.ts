@@ -5,13 +5,14 @@ import {
   getForecast,
   type ForecastWeek,
 } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 
 // Loads a user's data and runs the forecast (US-05, #11). It's calculated on
 // every request, so it always reflects the latest sync and availability.
 
 export async function getForecastForUser(
   userId: string,
-  { now, weeks = DEFAULT_FORECAST_WEEKS, timeZone = "UTC" }: {
+  { now, weeks = DEFAULT_FORECAST_WEEKS, timeZone = APP_TIME_ZONE }: {
     now: Date;
     weeks?: number;
     timeZone?: string;

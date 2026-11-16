@@ -9,6 +9,7 @@ import {
   toDateKey,
   type WeeklyHours,
 } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
 
 export type AssignmentKind = "HOMEWORK" | "PROJECT" | "EXAM" | "READING" | "OTHER";
 
@@ -42,6 +43,8 @@ export type WorkPlanOptions = {
   bufferDays?: number;
   /** Hours used when an assignment has no usable estimate. Default DEFAULT_HOURS_BY_KIND. */
   defaultHoursByKind?: Record<AssignmentKind, number>;
+  /** IANA time zone that decides which day is today. Default UTC. */
+  timeZone?: string;
 };
 
 export type PlannedSession = {
@@ -111,7 +114,7 @@ export function generateWorkPlan({
     throw new RangeError("maxSessionHours must be greater than 0.");
   }
 
-  const todayKey = toDateKey(now);
+  const todayKey = toLocalDateKey(now, options.timeZone ?? "UTC");
 
   // Filter and sort by ascending due date.
   const eligible = assignments

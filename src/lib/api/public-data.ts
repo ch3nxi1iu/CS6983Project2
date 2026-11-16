@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { getWorkPlanForUser, type PlanSessionView } from "@/lib/work-plan";
 import type { AssignmentKind } from "@/lib/planner/work-plan";
 import { toDateKey } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 
 export type OpenTaskView = {
   id: string;
@@ -40,7 +42,7 @@ export async function getOpenTasksForUser(userId: string): Promise<OpenTaskView[
 }
 
 /**
- * The sessions scheduled for today (UTC calendar day), from the stored plan.
+ * The sessions scheduled for today (in the app's time zone), from the stored plan.
  * Fails with AVAILABILITY_NOT_SET until the user has saved study hours, the
  * same as /api/plan.
  */
@@ -56,7 +58,7 @@ export async function getTodaySessionsForUser(
   if (!plan.ok) {
     return { ok: false, error: { code: "AVAILABILITY_NOT_SET", message: plan.message } };
   }
-  const date = toDateKey(now);
+  const date = toLocalDateKey(now, APP_TIME_ZONE);
   return { ok: true, value: { date, sessions: plan.sessions.filter((s) => s.date === date) } };
 }
 

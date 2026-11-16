@@ -8,6 +8,8 @@ import { getPlanningAvailability } from "@/lib/availability";
 import { generateWorkPlan } from "@/lib/planner/work-plan";
 import type { AtRiskItem, PlannedSession, WorkPlanResult } from "@/lib/planner/work-plan";
 import { addDays, dateKeyToDate, toDateKey } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 import type { Result } from "@/lib/planner/availability";
 
 export type RegeneratePlanOk = {
@@ -91,6 +93,7 @@ async function planFromDatabase(
     })),
     availability,
     now,
+    options: { timeZone: APP_TIME_ZONE },
   });
   return { ok: true, plan, assignments };
 }
@@ -148,7 +151,7 @@ export async function getWorkPlanForUser(userId: string, now: Date): Promise<Cur
   const computed = await planFromDatabase(userId, now);
   if (!computed.ok) return computed;
 
-  const todayKey = toDateKey(now);
+  const todayKey = toLocalDateKey(now, APP_TIME_ZONE);
   const rows = await prisma.workSession.findMany({
     where: {
       userId,

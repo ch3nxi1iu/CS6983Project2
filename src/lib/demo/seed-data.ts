@@ -9,6 +9,7 @@ import {
   type WeeklyHours,
 } from "@/lib/planner/availability";
 import { startOfWeek, toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 import type { AssignmentKind } from "@/lib/planner/work-plan";
 
 export type DemoAssignment = {
@@ -80,8 +81,9 @@ function dueAt(weekStart: string, week: number, day: number): Date {
  * Week 1 (next week) is the crunch week: 26h of work against 18h of study
  * time, because its Saturday is marked unavailable.
  */
-export function buildDemoData(now: Date): DemoData {
-  const weekStart = startOfWeek(toLocalDateKey(now));
+export function buildDemoData(now: Date, timeZone: string = APP_TIME_ZONE): DemoData {
+  // The same week the forecast starts on, so next week is still the overloaded one.
+  const weekStart = startOfWeek(toLocalDateKey(now, timeZone));
   return {
     weeklyHours: { ...DEFAULT_WEEKLY_HOURS },
     unavailableDates: [{ date: addDays(weekStart, 7 + 5), reason: "Family visit" }],

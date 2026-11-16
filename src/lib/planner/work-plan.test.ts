@@ -297,3 +297,51 @@ describe("generateWorkPlan", () => {
     ).toThrow(RangeError);
   });
 });
+
+describe("time zone", () => {
+  test("counts today in the given time zone, not in UTC", () => {
+    // 03:00 UTC on Mon Nov 16 is 7pm on Sun Nov 15 in Los Angeles.
+    const result = generateWorkPlan({
+      assignments: [
+        {
+          id: "a",
+          dueAt: new Date("2026-11-20T23:59:00Z"),
+          estimatedHours: 20,
+          submitted: false,
+          kind: "PROJECT",
+        },
+      ],
+      availability: {
+        weeklyHours: {
+          monday: 3, tuesday: 3, wednesday: 3, thursday: 3, friday: 2, saturday: 4, sunday: 4,
+        },
+        unavailableDates: [],
+      },
+      now: new Date("2026-11-16T03:00:00Z"),
+      options: { timeZone: "America/Los_Angeles" },
+    });
+    expect(result.sessions.map((s) => s.date)).toContain("2026-11-15");
+  });
+
+  test("still uses UTC when no time zone is given", () => {
+    const result = generateWorkPlan({
+      assignments: [
+        {
+          id: "a",
+          dueAt: new Date("2026-11-20T23:59:00Z"),
+          estimatedHours: 20,
+          submitted: false,
+          kind: "PROJECT",
+        },
+      ],
+      availability: {
+        weeklyHours: {
+          monday: 3, tuesday: 3, wednesday: 3, thursday: 3, friday: 2, saturday: 4, sunday: 4,
+        },
+        unavailableDates: [],
+      },
+      now: new Date("2026-11-16T03:00:00Z"),
+    });
+    expect(result.sessions.map((s) => s.date)).not.toContain("2026-11-15");
+  });
+});
