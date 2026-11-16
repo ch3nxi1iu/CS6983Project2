@@ -54,6 +54,7 @@ has loaded `AGENTS.md`.
 | #61 | #22 | Chenxi | Claude Code | Added screenshots, demo mode and the dashboard to the README, and the demo routes to the architecture diagram | Reviewed before pushing |
 | #63 | #62 | Chenxi | Claude Code | Wrote failing tests pinned to an evening in Pacific time, then counted "today" in one app time zone; a second-model review shaped the design (one zone, convert only real instants) | Spotted that the app showed tomorrow in the evening; reviewed before pushing |
 | #64 | #14 | Chenxi | Claude Code | Wrote failing tests, then the Mark done button on the plan and dashboard and rebuilds that subtract done hours; added an E2E test | Pointed out that marking work done needed the API; reviewed before pushing |
+| #65 | #20 | Chenxi | Claude Code | Wrote failing tests, then POST /api/assignments and the Add an assignment form on /plan, with an E2E test | Found that a user couldn't add anything in the demo; reviewed before pushing |
 
 ## Prompts
 
