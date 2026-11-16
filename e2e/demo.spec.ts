@@ -32,7 +32,30 @@ test("a demo user marks a planned session done on the plan", async ({ page }) =>
 
   await page.getByRole("button", { name: /^Mark done: / }).first().click();
 
-  // The page refreshes from the server: one more Done, one fewer button.
+  // The page refreshes from the server with the session Done and the plan
+  // rebuilt around the hours left (#14).
   await expect(doneLabels).toHaveCount(doneBefore + 1);
-  await expect(page.getByRole("button", { name: /^Mark done: / })).toHaveCount(buttonsBefore - 1);
+});
+
+test("a demo user marks a session missed, then undoes it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await expect(page).toHaveURL("/dashboard");
+
+  await page.goto("/plan");
+  await expect(page.getByRole("list", { name: /^Sessions on / })).toHaveCount(7);
+  const missedLabels = page.getByText("Missed", { exact: true });
+  const missedBefore = await missedLabels.count();
+
+  const missButton = page.getByRole("button", { name: /^Mark missed: / }).first();
+  const title = (await missButton.getAttribute("aria-label"))!.replace("Mark missed: ", "");
+  await missButton.click();
+
+  // The session shows as Missed, with an Undo button for it.
+  await expect(missedLabels).toHaveCount(missedBefore + 1);
+  const undo = page.getByRole("button", { name: `Undo: ${title}` });
+  await expect(undo.first()).toBeVisible();
+
+  await undo.first().click();
+  await expect(missedLabels).toHaveCount(missedBefore);
 });
