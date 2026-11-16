@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import AddAssignmentForm from "@/components/AddAssignmentForm";
+import AssignmentsSection from "@/components/AssignmentsSection";
 import WorkPlanSection from "@/components/WorkPlanSection";
 
 export default function PlanPage() {
@@ -35,6 +36,29 @@ export default function PlanPage() {
             </p>
           </div>
           <AddAssignmentForm />
+        </section>
+        <section
+          aria-labelledby="your-assignments-heading"
+          className="space-y-3 rounded-lg border border-rule bg-surface p-4"
+        >
+          <div className="space-y-1">
+            <h2 id="your-assignments-heading" className="text-lg font-bold">
+              Your assignments
+            </h2>
+            <p className="text-sm text-ink-2">
+              Work you haven&apos;t handed in, soonest due first. Hours done count the sessions you
+              marked done.
+            </p>
+          </div>
+          <Suspense
+            fallback={
+              <p role="status" className="text-sm text-ink-2">
+                Loading your assignments...
+              </p>
+            }
+          >
+            <AssignmentsSection />
+          </Suspense>
         </section>
       </div>
     </main>

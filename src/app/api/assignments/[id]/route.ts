@@ -1,55 +1,48 @@
-// PATCH /api/assignments/[id] (US-07, #13): saves an assignment's estimated
-// hours, then rebuilds the signed-in user's plan around the new estimate.
+// PATCH /api/assignments/[id] (US-07, #13; US-14, #20): saves an edit to one of
+// the signed-in user's assignments (any of title, dueDate, estimatedHours), then
+// rebuilds their plan around it.
+// DELETE /api/assignments/[id] (US-14, #20): deletes the assignment and its work
+// sessions, then rebuilds the plan.
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-import { regeneratePlanForUser, updateEstimatedHours } from "@/lib/work-plan";
-
-function readEstimatedHours(body: unknown): number | null {
-  if (typeof body !== "object" || body === null) return null;
-  const value = (body as Record<string, unknown>).estimatedHours;
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function validationError(message: string) {
-  return NextResponse.json({ error: { code: "VALIDATION_ERROR", message } }, { status: 400 });
-}
+import { deleteAssignmentForUser, updateAssignmentForUser } from "@/lib/assignments";
+import { regeneratePlanForUser } from "@/lib/work-plan";
+import { errorResponse, getApiUserId, unauthorizedResponse } from "@/lib/api/route-helpers";
 
 export async function PATCH(
   request: Request,
   { params }: RouteContext<"/api/assignments/[id]">,
 ) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json(
-      { error: { code: "UNAUTHORIZED", message: "Authentication required." } },
-      { status: 401 },
-    );
-  }
+  const userId = await getApiUserId();
+  if (!userId) return unauthorizedResponse();
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return validationError("Invalid JSON body.");
-  }
-
-  const estimatedHours = readEstimatedHours(body);
-  if (estimatedHours === null) {
-    return validationError("Send estimatedHours as a number of hours.");
-  }
-
+  // A body that isn't JSON becomes undefined, which updateAssignmentForUser rejects.
+  const body: unknown = await request.json().catch(() => undefined);
   const { id } = await params;
-  const updated = await updateEstimatedHours(user.id, id, estimatedHours);
-  if (!updated.ok) {
-    const status = updated.error.code === "NOT_FOUND" ? 404 : 400;
-    return NextResponse.json({ error: updated.error }, { status });
-  }
+  const updated = await updateAssignmentForUser(userId, id, body);
+  if (!updated.ok) return errorResponse(updated.error);
 
-  // The estimate is saved even when the plan can't be rebuilt yet (no study hours),
+  // The edit is saved even when the plan can't be rebuilt yet (no study hours),
   // so plan is null in that case instead of failing the request.
-  const plan = await regeneratePlanForUser(user.id, new Date());
+  const plan = await regeneratePlanForUser(userId, new Date());
   return NextResponse.json({
     assignment: updated.value,
     plan: plan.ok ? { sessions: plan.sessions, atRisk: plan.atRisk } : null,
   });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: RouteContext<"/api/assignments/[id]">,
+) {
+  const userId = await getApiUserId();
+  if (!userId) return unauthorizedResponse();
+
+  const { id } = await params;
+  const deleted = await deleteAssignmentForUser(userId, id);
+  if (!deleted) {
+    return errorResponse({ code: "NOT_FOUND", message: "Assignment not found." });
+  }
+  // Before study hours are saved there is no plan, and this does nothing.
+  await regeneratePlanForUser(userId, new Date());
+  return new NextResponse(null, { status: 204 });
 }

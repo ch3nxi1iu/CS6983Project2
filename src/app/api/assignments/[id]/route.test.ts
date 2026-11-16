@@ -208,11 +208,12 @@ describe("PATCH /api/assignments/[id] with title and due date (#20)", () => {
     }
   });
 
+  // One bad field stops the whole edit, so the valid title isn't saved either.
   test.each([
     ["an empty title", { title: "" }],
     ["a title longer than 120 characters", { title: "T".repeat(121) }],
-    ["a due date that doesn't exist", { dueDate: "2026-02-30" }],
-    ["more than 100 hours", { estimatedHours: 101 }],
+    ["a due date that doesn't exist", { title: "Renamed", dueDate: "2026-02-30" }],
+    ["more than 100 hours", { title: "Renamed", estimatedHours: 101 }],
     ["only fields that can't be edited", { courseCode: "CS 1" }],
   ])("returns 400 VALIDATION_ERROR and saves nothing for %s", async (_label, input) => {
     const userId = await signIn();
@@ -223,7 +224,7 @@ describe("PATCH /api/assignments/[id] with title and due date (#20)", () => {
       estimatedHours: 3,
     });
 
-    const res = await patch(assignment.id, JSON.stringify({ title: "Renamed", ...input }));
+    const res = await patch(assignment.id, JSON.stringify(input));
 
     expect(res.status).toBe(400);
     expect(await res.json()).toMatchObject({ error: { code: "VALIDATION_ERROR" } });
