@@ -60,7 +60,9 @@ export default async function DashboardContent() {
           <p className="text-sm text-ink-2">Nothing planned for today.</p>
         ) : topSessions.length === 0 ? (
           <div role="status" className="space-y-1">
-            <p className="font-semibold">All done for today.</p>
+            <p className="font-semibold">
+              {doneCount > 0 ? "All done for today." : "Nothing left for today."}
+            </p>
             {doneCount > 0 && (
               <p className="text-sm text-ink-2">You finished {countSessions(doneCount)} today.</p>
             )}
