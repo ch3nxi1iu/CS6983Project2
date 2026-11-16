@@ -55,6 +55,9 @@ has loaded `AGENTS.md`.
 | #63 | #62 | Chenxi | Claude Code | Wrote failing tests pinned to an evening in Pacific time, then counted "today" in one app time zone; a second-model review shaped the design (one zone, convert only real instants) | Spotted that the app showed tomorrow in the evening; reviewed before pushing |
 | #64 | #14 | Chenxi | Claude Code | Wrote failing tests, then the Mark done button on the plan and dashboard and rebuilds that subtract done hours; added an E2E test | Pointed out that marking work done needed the API; reviewed before pushing |
 | #65 | #20 | Chenxi | Claude Code | Wrote failing tests, then POST /api/assignments and the Add an assignment form on /plan, with an E2E test | Found that a user couldn't add anything in the demo; reviewed before pushing |
+| #66 | #14 | Chenxi | Claude Code | Wrote failing tests, then Mark missed and Undo on the plan, a status route that re-plans after every change, and an E2E test | Chose which stories to finish on the last day; reviewed before pushing |
+| #67 | #15 | Chenxi | Claude Code (subagent), Claude Code | Subagent: ranking with reason lines, the top-3 Today list, the all-done state, tests first. Claude Code: reviewed it and added the "Nothing left for today" case | Reviewed before pushing |
+| #68 | #20 | Chenxi | Claude Code (subagent), Claude Code | Subagent: edit, delete and the assignments list with hours done, tests first. Claude Code: reviewed it, ran E2E and checked screenshots | Reviewed before pushing |
 
 ## Prompts
 
