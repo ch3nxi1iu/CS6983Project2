@@ -76,3 +76,27 @@ test("a new user signs up, saves study hours, and sees the plan and dashboard", 
     await expect(today.getByRole("link", { name: "Set your study hours" })).toBeHidden();
   });
 });
+
+test("a new user adds their own assignment and sees it in the plan", async ({ page }) => {
+  const email = `e2e-add-${Date.now()}@example.com`;
+  await page.goto("/register");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("e2e-password-123");
+  await page.getByRole("button", { name: "Sign up" }).click();
+  await expect(page).toHaveURL("/dashboard");
+
+  await page.goto("/settings/availability");
+  await page.getByRole("button", { name: "Save hours" }).click();
+  await expect(page.getByRole("status")).toHaveText("Saved. Your plan and forecast use these hours.");
+
+  await page.goto("/plan");
+  const dueDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  await page.getByLabel("Course").fill("CS 6983");
+  await page.getByLabel("Title").fill("Final reflection");
+  await page.getByLabel("Due date").fill(dueDate);
+  await page.getByLabel("Estimated hours").fill("3");
+  await page.getByRole("button", { name: "Add assignment" }).click();
+
+  await expect(page.getByRole("status").filter({ hasText: "Added Final reflection" })).toBeVisible();
+  await expect(page.getByRole("list", { name: /^Sessions on / }).getByText("Final reflection").first()).toBeVisible();
+});

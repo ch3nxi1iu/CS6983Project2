@@ -137,3 +137,12 @@ describe("/plan page content", () => {
     expect(within(atRisk).getByText("5h short")).toBeDefined();
   });
 });
+
+describe("adding an assignment on /plan", () => {
+  test("the plan page has the Add an assignment form", async () => {
+    const { default: PlanPage } = await import("@/app/plan/page");
+    render(PlanPage());
+    expect(screen.getByRole("heading", { name: "Add an assignment" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Add assignment" })).toBeDefined();
+  });
+});

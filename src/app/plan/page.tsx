@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import AddAssignmentForm from "@/components/AddAssignmentForm";
 import WorkPlanSection from "@/components/WorkPlanSection";
 
 export default function PlanPage() {
@@ -20,6 +21,21 @@ export default function PlanPage() {
         >
           <WorkPlanSection />
         </Suspense>
+        <section
+          aria-labelledby="add-assignment-heading"
+          className="space-y-3 rounded-lg border border-rule bg-surface p-4"
+        >
+          <div className="space-y-1">
+            <h2 id="add-assignment-heading" className="text-lg font-bold">
+              Add an assignment
+            </h2>
+            <p className="text-sm text-ink-2">
+              Anything with a due date: homework, exam prep, a job application. The plan is rebuilt to
+              include it.
+            </p>
+          </div>
+          <AddAssignmentForm />
+        </section>
       </div>
     </main>
   );
