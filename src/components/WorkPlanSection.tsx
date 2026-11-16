@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MarkDoneButton from "@/components/MarkDoneButton";
 import RebuildPlanButton from "@/components/RebuildPlanButton";
 import { requireUser } from "@/lib/auth";
 import { addDays, toDateKey } from "@/lib/planner/availability";
@@ -109,6 +110,14 @@ export default async function WorkPlanSection() {
                     <p className="text-xs text-ink-2">
                       <span>{session.courseCode}</span> · <span className="tabular-nums">{formatHours(session.hours)}h</span>
                     </p>
+                    {session.status === "SCHEDULED" && (
+                      <div className="mt-2">
+                        <MarkDoneButton
+                          sessionId={session.id}
+                          assignmentTitle={session.assignmentTitle}
+                        />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

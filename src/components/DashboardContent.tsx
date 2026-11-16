@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MarkDoneButton from "@/components/MarkDoneButton";
 import WeekForecast from "@/components/WeekForecast";
 import { requireUser } from "@/lib/auth";
 import { getForecastForUser } from "@/lib/forecast";
@@ -75,6 +76,12 @@ export default async function DashboardContent() {
                     {STATUS_LABEL[session.status]}
                   </span>
                 </p>
+                {session.status === "SCHEDULED" && (
+                  <MarkDoneButton
+                    sessionId={session.id}
+                    assignmentTitle={session.assignmentTitle}
+                  />
+                )}
               </li>
             ))}
           </ul>
