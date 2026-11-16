@@ -2,7 +2,8 @@ import Link from "next/link";
 import WeekForecast from "@/components/WeekForecast";
 import { requireUser } from "@/lib/auth";
 import { getForecastForUser } from "@/lib/forecast";
-import { toDateKey } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 import { getWorkPlanForUser, type PlanSessionView } from "@/lib/work-plan";
 
 // Reads cookies and the database, so the page renders this inside <Suspense>.
@@ -28,7 +29,7 @@ export default async function DashboardContent() {
   ]);
 
   const todaysSessions = plan.ok
-    ? plan.sessions.filter((session) => session.date === toDateKey(now))
+    ? plan.sessions.filter((session) => session.date === toLocalDateKey(now, APP_TIME_ZONE))
     : [];
 
   return (

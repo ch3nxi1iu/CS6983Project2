@@ -1,7 +1,9 @@
 import Link from "next/link";
 import RebuildPlanButton from "@/components/RebuildPlanButton";
 import { requireUser } from "@/lib/auth";
-import { addDays, toDateKey } from "@/lib/planner/availability";
+import { addDays } from "@/lib/planner/availability";
+import { toLocalDateKey } from "@/lib/planner/forecast";
+import { APP_TIME_ZONE } from "@/lib/time-zone";
 import { getWorkPlanForUser, type PlanSessionView } from "@/lib/work-plan";
 
 // Reads the database, so it must sit inside a <Suspense> boundary (AGENTS.md).
@@ -51,7 +53,7 @@ export default async function WorkPlanSection() {
     );
   }
 
-  const todayKey = toDateKey(now);
+  const todayKey = toLocalDateKey(now, APP_TIME_ZONE);
   const days = Array.from({ length: 7 }, (_, offset) => addDays(todayKey, offset));
   const sessionsByDay = new Map<string, PlanSessionView[]>();
   for (const session of plan.sessions) {

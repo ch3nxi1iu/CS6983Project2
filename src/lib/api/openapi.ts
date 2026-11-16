@@ -124,12 +124,13 @@ export const openApiSpec: OpenApiDocument = {
         security: BEARER_OR_COOKIE,
         responses: {
           "200": {
-            description: "Sessions scheduled for today (UTC date) in the stored plan.",
+            description:
+              "Sessions scheduled for today in the stored plan. Today is the date in the app's time zone (Pacific unless APP_TIME_ZONE is set), not in UTC.",
             content: json({
               type: "object",
               required: ["date", "sessions"],
               properties: {
-                date: { type: "string", format: "date", description: "Today, YYYY-MM-DD." },
+                date: { type: "string", format: "date", description: "Today in the app's time zone, YYYY-MM-DD." },
                 sessions: { type: "array", items: ref("PlanSession") },
               },
             }),

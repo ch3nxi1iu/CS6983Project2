@@ -77,6 +77,7 @@ data, or create an account at `/register`, set your study hours on
 | `DATABASE_URL` | Always | Postgres connection used by the app (Neon's pooled URL in production) |
 | `DATABASE_URL_UNPOOLED` | Vercel only | Direct connection used by migrations; Neon's Vercel integration sets it |
 | `AUTH_SECRET` | Always, except in tests | Signs session JWTs and keys the API key hashes. Changing it signs everyone out and invalidates every API key |
+| `APP_TIME_ZONE` | Optional | The time zone "today", "this week" and the 7-day plan are counted in, as an IANA name. Defaults to `America/Los_Angeles`. One zone for every user, because pages render on the server before the browser could say where the user is |
 
 `.env` is gitignored. Never commit real values.
 
