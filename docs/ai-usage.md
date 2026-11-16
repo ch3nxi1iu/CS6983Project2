@@ -52,6 +52,8 @@ has loaded `AGENTS.md`.
 | #59 | #47 | Chenxi | Claude Code (subagent), Claude Code | Subagent: coverage config, script, CI summary, README numbers. Claude Code: reviewed, rebased, reran coverage, updated the numbers | Approved the dependency with Brandy; reviewed before pushing |
 | #60 | #6 | Chenxi | Claude Code (subagent), Claude Code | Subagent: Playwright config, smoke and first-visit tests, CI job. Claude Code: reviewed, rebased, added the demo-mode test | Approved the dependency (Brandy's OK pending); reviewed before pushing |
 | #61 | #22 | Chenxi | Claude Code | Added screenshots, demo mode and the dashboard to the README, and the demo routes to the architecture diagram | Reviewed before pushing |
+| #63 | #62 | Chenxi | Claude Code | Wrote failing tests pinned to an evening in Pacific time, then counted "today" in one app time zone; a second-model review shaped the design (one zone, convert only real instants) | Spotted that the app showed tomorrow in the evening; reviewed before pushing |
+| #64 | #14 | Chenxi | Claude Code | Wrote failing tests, then the Mark done button on the plan and dashboard and rebuilds that subtract done hours; added an E2E test | Pointed out that marking work done needed the API; reviewed before pushing |
 
 ## Prompts
 
