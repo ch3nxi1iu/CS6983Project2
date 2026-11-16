@@ -239,6 +239,32 @@ describe("dashboard content", () => {
     ).toBe("/plan");
   });
 
+  test("doesn't call the day done when today's only sessions were missed", async () => {
+    const userId = await signIn();
+    await setStudyHours(userId);
+    const assignment = await createAssignment(userId, {
+      courseCode: "CS 5800",
+      title: "Final project",
+      dueAt: dueInDays(5),
+      estimatedHours: 4,
+    });
+    await prisma.workSession.create({
+      data: {
+        userId,
+        assignmentId: assignment.id,
+        startAt: startOfDayInDays(0),
+        hours: 2,
+        status: "MISSED",
+      },
+    });
+
+    await renderDashboard();
+
+    const today = screen.getByRole("region", { name: "Today" });
+    expect(within(today).getByText("Nothing left for today.")).toBeDefined();
+    expect(within(today).queryByText("All done for today.")).toBeNull();
+  });
+
   test("says nothing is planned when the only sessions are on other days", async () => {
     const userId = await signIn();
     await setStudyHours(userId);
