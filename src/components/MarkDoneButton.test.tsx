@@ -42,7 +42,11 @@ describe("MarkDoneButton", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mark done: Homework 3" }));
 
     await waitFor(() => expect(refreshMock).toHaveBeenCalled());
-    expect(fetchMock).toHaveBeenCalledWith("/api/work-sessions/s1/complete", { method: "POST" });
+    expect(fetchMock).toHaveBeenCalledWith("/api/work-sessions/s1", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "DONE" }),
+    });
   });
 
   test("shows the server's error and doesn't refresh when it fails", async () => {

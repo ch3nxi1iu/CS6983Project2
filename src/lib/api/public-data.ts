@@ -64,7 +64,8 @@ export async function getTodaySessionsForUser(
 
 /**
  * Marks one of the user's work sessions DONE. Returns null when the session does
- * not exist or belongs to another user. Re-planning is left to #14.
+ * not exist or belongs to another user. Only the status changes here; the app's
+ * PATCH /api/work-sessions/[id] (#14) also rebuilds the plan.
  */
 export async function completeWorkSessionForUser(
   userId: string,

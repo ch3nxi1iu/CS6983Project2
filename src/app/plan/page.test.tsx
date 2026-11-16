@@ -120,9 +120,11 @@ describe("/plan page content", () => {
     expect(dayThree.getByText("Missed")).toBeDefined();
     expect(dayThree.getByText("1h")).toBeDefined();
 
-    // Only work still to do can be marked done.
+    // Work still to do can be marked done or missed; a missed session can be undone.
     expect(today.getByRole("button", { name: "Mark done: Homework 3" })).toBeDefined();
+    expect(today.getByRole("button", { name: "Mark missed: Homework 3" })).toBeDefined();
     expect(dayThree.queryByRole("button", { name: /^Mark done/ })).toBeNull();
+    expect(dayThree.getByRole("button", { name: "Undo: Homework 3" })).toBeDefined();
   });
 
   test("lists assignments that cannot fit under At risk, with the hours short", async () => {

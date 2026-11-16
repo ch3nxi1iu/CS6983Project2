@@ -220,6 +220,23 @@ export async function getWorkPlanForUser(userId: string, now: Date): Promise<Cur
 }
 
 /**
+ * Sets one of the user's work sessions to DONE, MISSED or back to SCHEDULED
+ * (undo) for US-08 (#14). Returns false when the session doesn't exist or
+ * belongs to someone else. The caller rebuilds the plan afterwards.
+ */
+export async function setWorkSessionStatus(
+  userId: string,
+  sessionId: string,
+  status: PlanSessionStatus,
+): Promise<boolean> {
+  const { count } = await prisma.workSession.updateMany({
+    where: { id: sessionId, userId },
+    data: { status },
+  });
+  return count > 0;
+}
+
+/**
  * Updates the estimated hours for a single assignment.
  * Returns NOT_FOUND if the assignment doesn't exist or belongs to another user.
  * Returns VALIDATION_ERROR if `hours` is not a positive finite number.
