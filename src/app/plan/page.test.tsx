@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
 import {
@@ -44,6 +44,8 @@ class SameRealmTextEncoder {
 vi.stubGlobal("TextEncoder", SameRealmTextEncoder);
 
 import WorkPlanSection from "@/components/WorkPlanSection";
+import AssignmentsSection from "@/components/AssignmentsSection";
+import { DELETE, PATCH } from "@/app/api/assignments/[id]/route";
 
 const createdUserIds: string[] = [];
 
@@ -148,5 +150,136 @@ describe("adding an assignment on /plan", () => {
     render(PlanPage());
     expect(screen.getByRole("heading", { name: "Add an assignment" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Add assignment" })).toBeDefined();
+  });
+});
+
+describe("your assignments on /plan (#20)", () => {
+  /** Sends the list's fetch calls to the real /api/assignments/[id] handlers. */
+  async function routeFetchToHandlers(input: string | URL, init?: RequestInit): Promise<Response> {
+    const url = new URL(String(input), "http://localhost:3000");
+    const request = new Request(url, init);
+    const match = /^\/api\/assignments\/([^/]+)$/.exec(url.pathname);
+    const context = { params: Promise.resolve({ id: match?.[1] ?? "" }) };
+    if (match && request.method === "PATCH") return PATCH(request, context);
+    if (match && request.method === "DELETE") return DELETE(request, context);
+    throw new Error(`Unexpected fetch: ${request.method} ${url.pathname}`);
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn(routeFetchToHandlers));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.stubGlobal("TextEncoder", SameRealmTextEncoder);
+  });
+
+  async function renderAssignments() {
+    render(await AssignmentsSection());
+  }
+
+  test("the plan page has a Your assignments section", async () => {
+    const { default: PlanPage } = await import("@/app/plan/page");
+    render(PlanPage());
+    expect(screen.getByRole("region", { name: "Your assignments" })).toBeDefined();
+  });
+
+  test("lists the user's own assignments, soonest due first, with hours done", async () => {
+    const userId = await signIn();
+    const later = await createAssignment(userId, {
+      courseCode: "CS 6983",
+      title: "Final reflection",
+      dueAt: dueInDays(9),
+      estimatedHours: 3,
+    });
+    await createAssignment(userId, {
+      courseCode: "DS 5110",
+      title: "Quiz prep",
+      dueAt: dueInDays(2),
+      estimatedHours: 2,
+    });
+    await prisma.workSession.create({
+      data: { userId, assignmentId: later.id, startAt: startOfDayInDays(0), hours: 1.5, status: "DONE" },
+    });
+    const otherId = await createTestUser();
+    createdUserIds.push(otherId);
+    await createAssignment(otherId, {
+      courseCode: "CS 1000",
+      title: "Not mine",
+      dueAt: dueInDays(3),
+      estimatedHours: 2,
+    });
+
+    await renderAssignments();
+
+    const rows = within(screen.getByRole("list", { name: "Your assignments" })).getAllByRole(
+      "listitem",
+    );
+    expect(rows).toHaveLength(2);
+    expect(within(rows[0]).getByText("Quiz prep")).toBeDefined();
+    expect(within(rows[0]).getByText("DS 5110")).toBeDefined();
+    expect(within(rows[0]).getByText("0h of 2h done")).toBeDefined();
+    expect(within(rows[1]).getByText("Final reflection")).toBeDefined();
+    expect(within(rows[1]).getByText("1.5h of 3h done")).toBeDefined();
+    expect(screen.queryByText("Not mine")).toBeNull();
+  });
+
+  test("shows how to add one when the user has no assignments", async () => {
+    await signIn();
+    await renderAssignments();
+    expect(screen.getByText("No assignments yet. Add one above.")).toBeDefined();
+  });
+
+  test("editing the hours saves them and rebuilds the plan", async () => {
+    const userId = await signIn();
+    await setStudyHours(userId);
+    const assignment = await createAssignment(userId, {
+      courseCode: "CS 6983",
+      title: "Final reflection",
+      dueAt: dueInDays(9),
+      estimatedHours: 3,
+    });
+    await renderAssignments();
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit: Final reflection" }));
+    const form = screen.getByRole("form", { name: "Edit Final reflection" });
+    fireEvent.change(within(form).getByLabelText("Estimated hours"), { target: { value: "5" } });
+    fireEvent.click(within(form).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toBe(
+        "Saved Final reflection. The plan is rebuilt.",
+      ),
+    );
+    const saved = await prisma.assignment.findUniqueOrThrow({ where: { id: assignment.id } });
+    expect(saved.estimatedHours).toBe(5);
+    const scheduled = await prisma.workSession.findMany({
+      where: { userId, assignmentId: assignment.id, status: "SCHEDULED" },
+    });
+    expect(scheduled.reduce((sum, s) => sum + s.hours, 0)).toBe(5);
+  });
+
+  test("deleting after confirming removes the assignment and its sessions", async () => {
+    const userId = await signIn();
+    await setStudyHours(userId);
+    const assignment = await createAssignment(userId, {
+      courseCode: "CS 6983",
+      title: "Final reflection",
+      dueAt: dueInDays(9),
+      estimatedHours: 3,
+    });
+    await prisma.workSession.create({
+      data: { userId, assignmentId: assignment.id, startAt: startOfDayInDays(1), hours: 3, status: "SCHEDULED" },
+    });
+    await renderAssignments();
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete: Final reflection" }));
+    fireEvent.click(screen.getByRole("button", { name: "Yes, delete" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toBe("Deleted Final reflection."),
+    );
+    expect(await prisma.assignment.findUnique({ where: { id: assignment.id } })).toBeNull();
+    expect(await prisma.workSession.count({ where: { assignmentId: assignment.id } })).toBe(0);
   });
 });
