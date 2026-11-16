@@ -5,7 +5,7 @@
 
 import { prisma } from "@/lib/db";
 import { getPlanningAvailability } from "@/lib/availability";
-import { generateWorkPlan } from "@/lib/planner/work-plan";
+import { DEFAULT_HOURS_BY_KIND, generateWorkPlan } from "@/lib/planner/work-plan";
 import type { AtRiskItem, PlannedSession, WorkPlanResult } from "@/lib/planner/work-plan";
 import { addDays, dateKeyToDate, toDateKey } from "@/lib/planner/availability";
 import { toLocalDateKey } from "@/lib/planner/forecast";
@@ -62,6 +62,19 @@ async function loadOpenAssignments(userId: string) {
 
 type OpenAssignment = Awaited<ReturnType<typeof loadOpenAssignments>>[number];
 
+/** Hours of DONE sessions per assignment, so a rebuild only plans what's left (#14). */
+async function loadDoneHours(userId: string): Promise<Map<string, number>> {
+  const rows = await prisma.workSession.groupBy({
+    by: ["assignmentId"],
+    where: { userId, status: "DONE" },
+    _sum: { hours: true },
+  });
+  return new Map(rows.map((row) => [row.assignmentId, row._sum.hours ?? 0]));
+}
+
+/** Below this, an assignment's remaining hours are rounding noise, not work. */
+const HOURS_EPSILON = 1e-9;
+
 /**
  * Runs the planner on the user's saved data without writing anything. Both
  * regeneratePlanForUser and getWorkPlanForUser use it, so they see the same inputs.
@@ -82,9 +95,21 @@ async function planFromDatabase(
     };
   }
 
-  const assignments = await loadOpenAssignments(userId);
+  const [assignments, doneHours] = await Promise.all([
+    loadOpenAssignments(userId),
+    loadDoneHours(userId),
+  ]);
+  // Hours already done count toward each assignment, so marking a session done
+  // isn't undone by the next rebuild. Assignments with nothing left drop out.
+  const toPlan = assignments.flatMap((a) => {
+    const done = doneHours.get(a.id) ?? 0;
+    if (done <= 0) return [a];
+    const total = a.estimatedHours > 0 ? a.estimatedHours : DEFAULT_HOURS_BY_KIND[a.kind];
+    const left = total - done;
+    return left > HOURS_EPSILON ? [{ ...a, estimatedHours: left }] : [];
+  });
   const plan = generateWorkPlan({
-    assignments: assignments.map((a) => ({
+    assignments: toPlan.map((a) => ({
       id: a.id,
       dueAt: a.dueAt,
       estimatedHours: a.estimatedHours,
